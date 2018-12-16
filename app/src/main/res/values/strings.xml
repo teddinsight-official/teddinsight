@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">TeddInsight</string>
+    <string name="log_in">Log In</string>
+    <string name="login_email_address">Email Address</string>
+    <string name="password">Password</string>
+    <string name="title_activity_designer">Designer</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="tasks">Tasks</string>
+    <string name="Conversations">Conversations</string>
+    <string name="empty_conversatoin">Conversations will appear here</string>
+    <string name="initial_upload">0/0 bytes</string>
+    <string name="finishing_up_please_wait">Finishing Up, Please Wait !!</string>
+    <string name="designs">Designs</string>
+</resources>
