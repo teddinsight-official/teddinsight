@@ -9,7 +9,7 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
@@ -24,26 +24,31 @@ android {
     }
 }
 
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+}
+
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:support-v13:28.0.0'
-    implementation 'com.android.support:support-media-compat:28.0.0'
-    implementation 'com.android.support:design:28.0.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'
+    implementation 'androidx.legacy:legacy-support-v13:1.0.0'
+    implementation 'androidx.media:media:1.1.0-alpha01'
+    implementation 'com.google.android.material:material:1.1.0-alpha02'
     implementation 'pub.devrel:easypermissions:2.0.0'
-    implementation 'com.android.support:support-vector-drawable:28.0.0'
-    implementation 'com.jakewharton:butterknife:9.0.0-rc2'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-rc2'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation 'androidx.vectordrawable:vectordrawable:1.0.1'
+    implementation 'com.jakewharton:butterknife:9.0.0-SNAPSHOT'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-SNAPSHOT'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'ja.burhanrashid52:photoeditor:0.3.3'
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation 'com.android.support:support-annotations:+'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    implementation 'androidx.annotation:annotation:1.0.1'
     implementation 'com.google.firebase:firebase-auth:16.1.0'
     implementation 'com.google.firebase:firebase-core:16.0.6'
     implementation 'com.google.firebase:firebase-database:16.0.5'
     implementation 'com.google.firebase:firebase-storage:16.0.5'
-    implementation 'com.android.support:cardview-v7:28.0.0'
-    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha01'
 }
