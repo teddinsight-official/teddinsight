@@ -6,20 +6,25 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -27,22 +32,36 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ng.com.teddinsight.teddinsight_app.R;
 import ng.com.teddinsight.teddinsight_app.models.DesignerDesigns;
 import ng.com.teddinsight.teddinsight_app.utils.ExtraUtils;
+import ng.com.teddinsight.teddinsight_app.listeners.Listeners.DesignTemplateClicked;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -50,31 +69,33 @@ import pub.devrel.easypermissions.EasyPermissions;
 import static android.app.Activity.RESULT_CANCELED;
 
 
-public class DesignerHomeFragment extends Fragment implements EasyPermissions.PermissionCallbacks {
+public class DesignerHomeFragment extends Fragment implements EasyPermissions.PermissionCallbacks, DesignTemplateClicked {
 
     private static final int PERMISSIONS_REQUEST_CODE = 1001;
     private int GALLERY = 1, CAMERA = 2;
 
-    public static final Fragment NewInstance() {
+    public static Fragment NewInstance() {
         return new DesignerHomeFragment();
     }
 
     @BindView(R.id.designs_grid)
-    GridView designGrid;
+    RecyclerView designGrid;
+    @BindView(R.id.new_design_button)
+    FloatingActionButton newDesignButton;
+    @BindView(R.id.designs_title)
+    TextView designTitle;
     private String templateTitle;
-    Uri contentURI;
-    FirebaseStorage storage = FirebaseStorage.getInstance();
-    StorageReference storageRef;
+    private Uri contentURI;
     private Uri imageDownloadUri;
-    DatabaseReference designRef;
-
-    View v;
+    private DatabaseReference designRef;
+    private DesignerAdapter adapter;
+    boolean isNotDesign;
 
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        v = inflater.inflate(R.layout.fragment_home_designer, container, false);
+        View v = inflater.inflate(R.layout.fragment_home_designer, container, false);
         ButterKnife.bind(this, v);
         return v;
     }
@@ -82,8 +103,38 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        storageRef = storage.getReference();
-        designRef = FirebaseDatabase.getInstance().getReference("designer");
+        isNotDesign = FirebaseAuth.getInstance().getCurrentUser().getEmail().startsWith("content");
+        if (isNotDesign) {
+            designTitle.setText(getString(R.string.adoi));
+            newDesignButton.setVisibility(View.GONE);
+        }
+        designRef = FirebaseDatabase.getInstance().getReference("designer/designs");
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        designGrid.setLayoutManager(linearLayoutManager);
+        adapter = new DesignerAdapter(!isNotDesign, this);
+        designGrid.setAdapter(adapter);
+        getDesigns();
+    }
+
+    private void getDesigns() {
+        designRef.orderByChild("isUpdated").equalTo(false).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<DesignerDesigns> designerDesignsList = new ArrayList<>();
+                for (DataSnapshot snap : dataSnapshot.getChildren()) {
+                    DesignerDesigns dd = snap.getValue(DesignerDesigns.class);
+                    designerDesignsList.add(dd);
+                }
+                adapter.swapData(designerDesignsList);
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void requestCameraPermission() {
@@ -141,25 +192,24 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
         startActivityForResult(intent, CAMERA);
     }
 
-    private void uploadFile() {
+    public static void uploadFile(Uri contentURI, Context context, String templateTitle, boolean isUpdate, String key) {
         if (contentURI != null) {
-            StorageReference imageRef = storageRef.child("designer/" + templateTitle);
+            StorageReference imageRef = FirebaseStorage.getInstance().getReference().child("designer/designs" + templateTitle);
             UploadTask uploadTask = imageRef.putFile(contentURI);
-            AlertDialog.Builder progressDialog = new AlertDialog.Builder(getContext());
-            View v = LayoutInflater.from(getContext()).inflate(R.layout.upload_dialog_layout, null, false);
+            AlertDialog.Builder progressDialog = new AlertDialog.Builder(context);
+            View v = LayoutInflater.from(context).inflate(R.layout.upload_dialog_layout, null, false);
             final ProgressBar progressBar = v.findViewById(R.id.progressBar);
             final TextView tv = v.findViewById(R.id.upload_title);
             final TextView uploadPercentTextView = v.findViewById(R.id.upload_percentage);
             final TextView finalize = v.findViewById(R.id.finalize_textview);
             uploadPercentTextView.setText("0 %");
-            tv.setText(getString(R.string.initial_upload));
+            tv.setText(context.getString(R.string.initial_upload));
             progressDialog.setView(v);
 
             AlertDialog dialog = progressDialog.show();
             uploadTask.addOnProgressListener(taskSnapshot -> {
                 long progress = (long) (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
                 int p = ExtraUtils.safeLongToInt(progress);
-                Log.e("TAG", "P: " + p);
                 String t = "" + taskSnapshot.getBytesTransferred() + "/" + taskSnapshot.getTotalByteCount() + " bytes";
                 tv.setText(t);
                 uploadPercentTextView.setText(p + " %");
@@ -176,29 +226,43 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
                     progressBar.setVisibility(View.GONE);
                     uploadPercentTextView.setVisibility(View.GONE);
                     finalize.setVisibility(View.VISIBLE);
-                    imageDownloadUri = task.getResult();
-                    saveDetailsToDatabase(dialog);
+                    Uri imageDownloadUri = task.getResult();
+                    assert imageDownloadUri != null;
+                    if (isUpdate)
+                        updateTemplateDetails(context, dialog, key, imageDownloadUri);
+                    else
+                        saveDetailsToDatabase(dialog, templateTitle, imageDownloadUri, context);
                 } else {
                     dialog.cancel();
-                    showText("An Error Occurred while uploading Image, Try Again!");
+                    Toast.makeText(context, "An Error Occurred while uploading Image, Try Again!", Toast.LENGTH_LONG).show();
                 }
             });
         }
     }
 
-    private void saveDetailsToDatabase(AlertDialog dialog) {
-        DesignerDesigns designerDesigns = new DesignerDesigns(templateTitle, false, imageDownloadUri.toString());
+    public static void updateTemplateDetails(Context context, AlertDialog dialog, String id, Uri imageUri) {
+        DatabaseReference designRef = FirebaseDatabase.getInstance().getReference("designer/designs").child(id);
+        designRef.child("imageUrl").setValue(imageUri.toString()).addOnCompleteListener(task -> {
+            dialog.cancel();
+            if (task.isSuccessful()) {
+                Toast.makeText(context, "Design Updated Successfully", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(context, "An Error Occurred, Please Try again", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    public static void saveDetailsToDatabase(AlertDialog dialog, String templateTitle, Uri imageDownloadUri, Context context) {
+        DatabaseReference designRef = FirebaseDatabase.getInstance().getReference("designer/designs");
         String key = designRef.push().getKey();
         assert key != null;
-        designRef.child(key).updateChildren(designerDesigns.toMap()).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                dialog.cancel();
-                if (task.isSuccessful()) {
-                    showText("Design Uploaded Successfully");
-                } else {
-                    showText("An Error Occurred, Please Try again");
-                }
+        DesignerDesigns designerDesigns = new DesignerDesigns(key, templateTitle, false, imageDownloadUri.toString());
+        designRef.child(key).updateChildren(designerDesigns.toMap()).addOnCompleteListener(task -> {
+            dialog.cancel();
+            if (task.isSuccessful()) {
+                Toast.makeText(context, "Design Uploaded Successfully", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(context, "An Error Occurred, Please Try again", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -233,7 +297,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
                 contentURI = data.getData();
                 try {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
-                    uploadFile();
+                    uploadFile(contentURI, getContext(), templateTitle, false, null);
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -256,6 +320,92 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
             new AppSettingsDialog.Builder(this).build().show();
         }
         requestCameraPermission();
+    }
+
+    @Override
+    public void onTemplateClicked(boolean isDesigner, DesignerDesigns designerDesigns) {
+        if (isDesigner) {
+            FragmentTransaction ft = getChildFragmentManager().beginTransaction();
+            assert getFragmentManager() != null;
+            Fragment prev = getFragmentManager().findFragmentByTag("edit");
+            if (prev != null) {
+                ft.remove(prev);
+            }
+            DesignEditorFragment.NewInstance(designerDesigns).show(ft, "edit");
+        }
+    }
+
+    public class DesignerAdapter extends RecyclerView.Adapter<DesignerAdapter.DesignViewHolder> {
+
+
+        List<DesignerDesigns> designerDesignsList;
+        boolean isDesigner;
+        DesignTemplateClicked designTemplateClicked;
+
+        DesignerAdapter(boolean isDesigner, DesignTemplateClicked clicked) {
+            this.isDesigner = isDesigner;
+            designerDesignsList = new ArrayList<>();
+            this.designTemplateClicked = clicked;
+        }
+
+        @NonNull
+        @Override
+        public DesignViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_designer_designs, parent, false);
+            return new DesignViewHolder(v);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull DesignViewHolder holder, int position) {
+            DesignerDesigns designerDesigns = designerDesignsList.get(getItemCount() - position - 1);
+            holder.templateTitleView.setText(designerDesigns.getTemplateName());
+            Picasso.get().load(designerDesigns.getImageUrl())
+                    .into(holder.templateImageView);
+
+            Target target = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    // loading of the bitmap was a success
+                    // TODO do some action with the bitmap
+                }
+
+                @Override
+                public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                }
+            };
+        }
+
+        @Override
+        public int getItemCount() {
+            return designerDesignsList.size();
+        }
+
+        void swapData(List<DesignerDesigns> designs) {
+            this.designerDesignsList = designs;
+            this.notifyDataSetChanged();
+        }
+
+        class DesignViewHolder extends RecyclerView.ViewHolder {
+            @BindView(R.id.template_image)
+            ImageView templateImageView;
+            @BindView(R.id.template_title)
+            TextView templateTitleView;
+
+            DesignViewHolder(@NonNull View itemView) {
+                super(itemView);
+                ButterKnife.bind(this, itemView);
+                itemView.setOnClickListener(v -> {
+                    designTemplateClicked.onTemplateClicked(isDesigner, designerDesignsList.get(getItemCount() - getAdapterPosition() - 1));
+                });
+            }
+        }
+
     }
 
 }

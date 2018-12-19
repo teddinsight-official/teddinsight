@@ -1,27 +1,60 @@
 package ng.com.teddinsight.teddinsight_app.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.ServerValue;
+
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DesignerDesigns {
+public class DesignerDesigns implements Parcelable {
 
-    public int id;
+    public String id;
     public String templateName;
     public boolean isUpdated;
     public String imageUrl;
-    public String dateUploaded;
+    public long dateUploaded;
+    public long invertedDateUploaded;
 
-    public DesignerDesigns(String templateName, boolean isUpdated, String imageUrl) {
+    public DesignerDesigns() {
+    }
+
+    public DesignerDesigns(String id, String templateName, boolean isUpdated, String imageUrl) {
+        this.id = id;
         this.templateName = templateName;
         this.isUpdated = isUpdated;
         this.imageUrl = imageUrl;
     }
 
-    public int getId() {
+    protected DesignerDesigns(Parcel in) {
+        id = in.readString();
+        templateName = in.readString();
+        isUpdated = in.readByte() != 0;
+        imageUrl = in.readString();
+        dateUploaded = in.readLong();
+        invertedDateUploaded = in.readLong();
+    }
+
+    public static final Creator<DesignerDesigns> CREATOR = new Creator<DesignerDesigns>() {
+        @Override
+        public DesignerDesigns createFromParcel(Parcel in) {
+            return new DesignerDesigns(in);
+        }
+
+        @Override
+        public DesignerDesigns[] newArray(int size) {
+            return new DesignerDesigns[size];
+        }
+    };
+
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String  id) {
         this.id = id;
     }
 
@@ -49,12 +82,31 @@ public class DesignerDesigns {
         this.imageUrl = imageUrl;
     }
 
+    @Exclude
     public Map<String, Object> toMap() {
+
         Map<String, Object> o = new HashMap<>();
         o.put("templateName", this.templateName);
         o.put("isUpdated", this.isUpdated);
         o.put("imageUrl", this.imageUrl);
-        o.put("dateUploaded", this.dateUploaded);
+        o.put("id", this.id);
+        o.put("dateUploaded", ServerValue.TIMESTAMP);
+        o.put("invertedDateUploaded", -1 * new Date().getTime());
         return o;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(templateName);
+        dest.writeByte((byte) (isUpdated ? 1 : 0));
+        dest.writeString(imageUrl);
+        dest.writeLong(dateUploaded);
+        dest.writeLong(invertedDateUploaded);
     }
 }

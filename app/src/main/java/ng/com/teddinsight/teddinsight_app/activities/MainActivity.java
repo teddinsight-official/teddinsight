@@ -1,11 +1,15 @@
 package ng.com.teddinsight.teddinsight_app.activities;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -37,6 +41,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
     private static final int RC_SIGN_IN = 100;
+    private static final String TAG = MainActivity.class.getCanonicalName();
     FirebaseAuth mAuth;
     FirebaseUser mUser;
     FirebaseDatabase firebaseDatabase;
@@ -48,7 +53,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     @BindView(R.id.password)
     EditText passwordEditText;
     User userInfo;
-    public static final int PERMISSION_REQUESTS= 1;
+    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    public static final int PERMISSION_REQUESTS = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +115,13 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 userInfo = dataSnapshot.getValue(User.class);
+                assert userInfo != null;
+                if (!userInfo.hasAccess) {
+                    mAuth.signOut();
+                    dialog.dismiss();
+                    showRevokedDialog();
+                    return;
+                }
                 SharedPreferences.Editor editor = preferences.edit();
                 Log.e("TAG", userInfo.getRole());
                 Log.e("TAG", userInfo.getEmail());
@@ -129,9 +142,14 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         });
     }
 
-    private void chooseDestination(String role){
-        if (dialog != null && dialog.isShowing())
-            dialog.dismiss();
+    private void chooseDestination(String role) {
+        if (dialog != null && dialog.isShowing()) {
+            try {
+                dialog.dismiss();
+            } catch (Exception e) {
+                Log.e(TAG, "e: "+e.getMessage());
+            }
+        }
         switch (role) {
             case "designer":
                 redirect(DesignerActivity.class);
@@ -157,18 +175,41 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (getIntent().hasExtra("revoke")) {
+            showRevokedDialog();
+        }
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
-        if (FirebaseAuth.getInstance().getCurrentUser() != null){
-            if (preferences.contains("role")){
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            if (preferences.contains("role")) {
                 String role = preferences.getString("role", "");
                 chooseDestination(role);
-            }else{
+            } else {
                 Log.e("TAG", "shit didn't save to preference");
             }
-        }else{
+        } else {
             Log.e("TAG", "user is null");
         }
+    }
+
+    private void showRevokedDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Access Revoked")
+                .setMessage("Your access to this app has been revoked by an admin user. Sort it out with them")
+                .setPositiveButton("Ok", (dialog, which) -> {
+                    dialog.cancel();
+                });
+        try{
+            builder.show();
+        }catch (Exception e){
+            Log.e(TAG, "e: "+e.getLocalizedMessage());
+        }
+
     }
 
     @Override

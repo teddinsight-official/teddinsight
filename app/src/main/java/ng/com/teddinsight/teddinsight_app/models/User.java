@@ -16,6 +16,7 @@ public class User {
     public String lastName;
     public String deviceToken;
     public String role;
+    public boolean hasAccess;
 
     public User() {
     }
@@ -27,6 +28,7 @@ public class User {
         this.lastName = lastName;
         this.deviceToken = deviceToken;
         this.role = role;
+        this.hasAccess = true;
     }
 
     public User(String id, String username) {
@@ -108,6 +110,7 @@ public class User {
         result.put("deviceToken", deviceToken);
         result.put("role", role);
         result.put("dateRegistered", ServerValue.TIMESTAMP);
+        result.put("hasAccess", this.hasAccess);
         return result;
     }
 

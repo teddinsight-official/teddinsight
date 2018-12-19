@@ -1,8 +1,14 @@
 package ng.com.teddinsight.teddinsight_app.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -24,28 +30,28 @@ public class DesignerActivity extends AppCompatActivity {
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = item -> {
-                switch (item.getItemId()) {
-                    case R.id.navigation_home:
-                        if (currentFragment.equals(FRAGMENT_HOME))
-                            return false;
-                        currentFragment = FRAGMENT_HOME;
-                        replaceFragmentContainerContent(DesignerHomeFragment.NewInstance());
-                        return true;
-                    case R.id.navigation_dashboard:
-                        if (currentFragment.equals(FRAGMENT_TASK))
-                            return false;
-                        currentFragment = FRAGMENT_TASK;
-                        replaceFragmentContainerContent(TaskFragment.NewInstance());
-                        return true;
-                    case R.id.navigation_notifications:
-                        if (currentFragment.equals(FRAGMENT_CONVERSATION))
-                            return false;
-                        currentFragment = FRAGMENT_CONVERSATION;
-                        replaceFragmentContainerContent(ConversationFragment.NewInstance());
-                        return true;
-                }
-                return false;
-            };
+        switch (item.getItemId()) {
+            case R.id.navigation_home:
+                if (currentFragment.equals(FRAGMENT_HOME))
+                    return false;
+                currentFragment = FRAGMENT_HOME;
+                replaceFragmentContainerContent(DesignerHomeFragment.NewInstance());
+                return true;
+            case R.id.navigation_dashboard:
+                if (currentFragment.equals(FRAGMENT_TASK))
+                    return false;
+                currentFragment = FRAGMENT_TASK;
+                replaceFragmentContainerContent(TaskFragment.NewInstance());
+                return true;
+            case R.id.navigation_notifications:
+                if (currentFragment.equals(FRAGMENT_CONVERSATION))
+                    return false;
+                currentFragment = FRAGMENT_CONVERSATION;
+                replaceFragmentContainerContent(ConversationFragment.NewInstance());
+                return true;
+        }
+        return false;
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +61,11 @@ public class DesignerActivity extends AppCompatActivity {
         fragmentManager = getSupportFragmentManager();
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        replaceFragmentContainerContent(DesignerHomeFragment.NewInstance());
+        if (savedInstanceState == null) {
+            replaceFragmentContainerContent(DesignerHomeFragment.NewInstance());
+        } else {
+            currentFragment = savedInstanceState.getString("current");
+        }
     }
 
     void replaceFragmentContainerContent(Fragment fragment) {
@@ -64,4 +74,19 @@ public class DesignerActivity extends AppCompatActivity {
         fragmentTransaction.replace(R.id.designer_contents, fragment).commit();
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("current", currentFragment);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            Toast.makeText(this, "Please Login Again!", Toast.LENGTH_LONG).show();
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+        }
+    }
 }

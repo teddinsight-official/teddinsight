@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TeddInsight</string>
+    <string name="app_name">TeddInsight DnC</string>
     <string name="log_in">Log In</string>
     <string name="login_email_address">Email Address</string>
     <string name="password">Password</string>
@@ -13,4 +13,12 @@
     <string name="initial_upload">0/0 bytes</string>
     <string name="finishing_up_please_wait">Finishing Up, Please Wait !!</string>
     <string name="designs">Designs</string>
+    <string name="due_by">Due By:</string>
+    <string name="description">Description</string>
+    <string name="assigned_on">Assigned On:</string>
+    <string name="assigned_by">Assigned By:</string>
+    <string name="due_date">Due Date:</string>
+    <string name="days_left">Days Left:</string>
+    <string name="status">Status:</string>
+    <string name="adoi">Add contents to these designs</string>
 </resources>
