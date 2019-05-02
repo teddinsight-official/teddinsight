@@ -1,4 +1,4 @@
-package com.burhanrashid52.imageeditor;
+package ng.com.teddinsight.teddinsight_app.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -7,15 +7,18 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
+import ng.com.teddinsight.teddinsight_app.R;
 
 /**
  * Created by Ahmed Adel on 5/8/17.
@@ -28,13 +31,13 @@ public class ColorPickerAdapter extends RecyclerView.Adapter<ColorPickerAdapter.
     private List<Integer> colorPickerColors;
     private OnColorPickerClickListener onColorPickerClickListener;
 
-    ColorPickerAdapter(@NonNull Context context, @NonNull List<Integer> colorPickerColors) {
+    public ColorPickerAdapter(@NonNull Context context, @NonNull List<Integer> colorPickerColors) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
         this.colorPickerColors = colorPickerColors;
     }
 
-    ColorPickerAdapter(@NonNull Context context) {
+    public ColorPickerAdapter(@NonNull Context context) {
         this(context, getDefaultColors(context));
         this.context = context;
         this.inflater = LayoutInflater.from(context);

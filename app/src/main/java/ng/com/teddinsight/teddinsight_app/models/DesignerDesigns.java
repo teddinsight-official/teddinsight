@@ -18,6 +18,7 @@ public class DesignerDesigns implements Parcelable {
     public String imageUrl;
     public long dateUploaded;
     public long invertedDateUploaded;
+    public boolean canEdit = false;
 
     public DesignerDesigns() {
     }
@@ -36,6 +37,23 @@ public class DesignerDesigns implements Parcelable {
         imageUrl = in.readString();
         dateUploaded = in.readLong();
         invertedDateUploaded = in.readLong();
+        canEdit = in.readByte() != 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(templateName);
+        dest.writeByte((byte) (isUpdated ? 1 : 0));
+        dest.writeString(imageUrl);
+        dest.writeLong(dateUploaded);
+        dest.writeLong(invertedDateUploaded);
+        dest.writeByte((byte) (canEdit ? 1 : 0));
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<DesignerDesigns> CREATOR = new Creator<DesignerDesigns>() {
@@ -49,6 +67,14 @@ public class DesignerDesigns implements Parcelable {
             return new DesignerDesigns[size];
         }
     };
+
+    public boolean isCanEdit() {
+        return canEdit;
+    }
+
+    public void setCanEdit(boolean canEdit) {
+        this.canEdit = canEdit;
+    }
 
     public String getId() {
         return id;
@@ -95,18 +121,4 @@ public class DesignerDesigns implements Parcelable {
         return o;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id);
-        dest.writeString(templateName);
-        dest.writeByte((byte) (isUpdated ? 1 : 0));
-        dest.writeString(imageUrl);
-        dest.writeLong(dateUploaded);
-        dest.writeLong(invertedDateUploaded);
-    }
 }

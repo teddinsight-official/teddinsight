@@ -16,4 +16,9 @@
         android:icon="@drawable/ic_message_black_24dp"
         android:title="@string/Conversations" />
 
+    <item
+        android:id="@+id/navigation_client_upload"
+        android:icon="@drawable/ic_file_download"
+        android:title="@string/client_upload" />
+
 </menu>

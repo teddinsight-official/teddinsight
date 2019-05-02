@@ -1,5 +1,6 @@
 package ng.com.teddinsight.teddinsight_app.fragments;
 
+import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 
@@ -7,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,14 +25,17 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ng.com.teddinsight.teddinsight_app.R;
 import ng.com.teddinsight.teddinsight_app.listeners.Listeners;
+import ng.com.teddinsight.teddinsight_app.models.Notifications;
 import ng.com.teddinsight.teddinsight_app.models.Tasks;
 import ng.com.teddinsight.teddinsight_app.utils.ExtraUtils;
 
@@ -42,8 +47,13 @@ public class TaskFragment extends Fragment implements Listeners.TaskItemClicked 
     TaskAdapter adapter;
     @BindView(R.id.taask_recyclerView)
     RecyclerView recyclerView;
+    @BindView(R.id.t_swipe_refresh)
+    SwipeRefreshLayout refreshLayout;
+    @BindView(R.id.no_task_yet)
+    TextView noTaskTextView;
     boolean isDesigner;
     String user;
+    FirebaseUser firebaseUser;
 
     public static Fragment NewInstance() {
         return new TaskFragment();
@@ -56,7 +66,10 @@ public class TaskFragment extends Fragment implements Listeners.TaskItemClicked 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.fragment_tasks, container, false);
         ButterKnife.bind(this, v);
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        refreshLayout.setRefreshing(true);
+        refreshLayout.setColorSchemeColors(Color.RED, Color.BLUE, Color.GREEN, Color.CYAN);
+        refreshLayout.setOnRefreshListener(this::fetchTasks);
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         assert firebaseUser != null;
         if (firebaseUser.getEmail().startsWith("content")) {
             isDesigner = false;
@@ -65,18 +78,24 @@ public class TaskFragment extends Fragment implements Listeners.TaskItemClicked 
             isDesigner = true;
             user = "designer";
         }
-        reference = FirebaseDatabase.getInstance().getReference(user + "/tasks");
+        reference = FirebaseDatabase.getInstance().getReference(Tasks.getTableName()).child(firebaseUser.getUid());
         adapter = new TaskAdapter(new ArrayList<>(), this);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
+        //jmkds();
         fetchTasks();
+        clearTaskNotification();
         return v;
     }
 
-    private void jmkds(){
+    private void clearTaskNotification() {
+        FirebaseDatabase.getInstance().getReference().child(Notifications.getTableName()).child(firebaseUser.getUid()).child("newTaskReceived").setValue(false);
+    }
+
+    private void jmkds() {
         DatabaseReference keyref = reference.push();
         String key = keyref.getKey();
-        Tasks tasks = new Tasks(key, "Task o","hkspfoijodfv","HR", System.currentTimeMillis());
+        Tasks tasks = new Tasks(key, "Task o", "hkspfoijodfv", "HR", System.currentTimeMillis());
         reference.child(key).updateChildren(tasks.toMap());
 
     }
@@ -89,14 +108,20 @@ public class TaskFragment extends Fragment implements Listeners.TaskItemClicked 
                 List<Tasks> tasksList = new ArrayList<>();
                 for (DataSnapshot snap : dataSnapshot.getChildren()) {
                     Tasks tasks = snap.getValue(Tasks.class);
+                    tasks.id = snap.getKey();
                     tasksList.add(tasks);
                 }
                 adapter.swapData(tasksList);
+                if (adapter.getItemCount() > 0)
+                    noTaskTextView.setVisibility(View.INVISIBLE);
+                else
+                    noTaskTextView.setVisibility(View.VISIBLE);
+                refreshLayout.setRefreshing(false);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                refreshLayout.setRefreshing(false);
             }
         });
     }
@@ -136,7 +161,7 @@ public class TaskFragment extends Fragment implements Listeners.TaskItemClicked 
         public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
             Tasks tasks = tasksList.get(position);
             holder.asignedBy.setText(tasks.getAssignedBy());
-            holder.dueDate.setText(ExtraUtils.formatDate(tasks.getDueDate() * 1000));
+            holder.dueDate.setText(ExtraUtils.getHumanReadableString(tasks.getDueDate()));
             holder.templateTitleView.setText(tasks.getTaskTitle());
             GradientDrawable magnitudeCircle = (GradientDrawable) holder.circle.getBackground();
             int magnitudeColor = getColor(tasks.getStatus());

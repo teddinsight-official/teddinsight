@@ -1,20 +1,25 @@
-package com.burhanrashid52.imageeditor.base;
+package ng.com.teddinsight.teddinsight_app.base;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-/**
- * Created by Burhanuddin Rashid on 1/17/2018.
- */
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import ng.com.teddinsight.teddinsight_app.activities.LoginActivity;
+
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -72,5 +77,19 @@ public class BaseActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(0, 0, Menu.FIRST, "Sign Out");
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        FirebaseAuth.getInstance().signOut();
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
+        return super.onOptionsItemSelected(item);
     }
 }

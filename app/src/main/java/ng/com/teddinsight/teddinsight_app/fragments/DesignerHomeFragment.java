@@ -1,14 +1,20 @@
 package ng.com.teddinsight.teddinsight_app.fragments;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
@@ -22,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -42,36 +49,46 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import org.w3c.dom.Text;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ng.com.teddinsight.teddinsight_app.R;
+import ng.com.teddinsight.teddinsight_app.listeners.Listeners;
 import ng.com.teddinsight.teddinsight_app.models.DesignerDesigns;
 import ng.com.teddinsight.teddinsight_app.utils.ExtraUtils;
 import ng.com.teddinsight.teddinsight_app.listeners.Listeners.DesignTemplateClicked;
+import ng.com.teddinsight.teddinsightchat.models.User;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
 
 import static android.app.Activity.RESULT_CANCELED;
+import static androidx.constraintlayout.widget.Constraints.TAG;
 
 
 public class DesignerHomeFragment extends Fragment implements EasyPermissions.PermissionCallbacks, DesignTemplateClicked {
 
     private static final int PERMISSIONS_REQUEST_CODE = 1001;
+    public static final String DESIGN_PATH = "/Teddinsight/Design And Content";
     private int GALLERY = 1, CAMERA = 2;
 
     public static Fragment NewInstance() {
@@ -84,13 +101,19 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
     FloatingActionButton newDesignButton;
     @BindView(R.id.designs_title)
     TextView designTitle;
+    @BindView(R.id.d_swipe_refresh)
+    SwipeRefreshLayout refreshLayout;
+    @BindView(R.id.home_title)
+    TextView homeTitle;
     private String templateTitle;
     private Uri contentURI;
     private Uri imageDownloadUri;
     private DatabaseReference designRef;
     private DesignerAdapter adapter;
     boolean isNotDesign;
-
+    SharedPreferences preferences;
+    String path = "/TeddinsightDnC/Images";
+    Listeners.ShowEditImageActivity showEditImageActivity;
 
     @Nullable
     @Override
@@ -103,10 +126,19 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        isNotDesign = FirebaseAuth.getInstance().getCurrentUser().getEmail().startsWith("content");
+        requestCameraPermission();
+        preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        refreshLayout.setRefreshing(true);
+        refreshLayout.setColorSchemeColors(Color.RED, Color.BLUE, Color.GREEN, Color.CYAN);
+        refreshLayout.setOnRefreshListener(this::getDesigns);
+        isNotDesign = preferences.getString("role", "Content").equals(User.USER_CONTENT);
         if (isNotDesign) {
+            homeTitle.setText(User.USER_CONTENT);
             designTitle.setText(getString(R.string.adoi));
             newDesignButton.setVisibility(View.GONE);
+        } else {
+            homeTitle.setText(User.USER_DESIGNER);
+            designTitle.setText(getString(R.string.upload_designs));
         }
         designRef = FirebaseDatabase.getInstance().getReference("designer/designs");
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
@@ -126,13 +158,12 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
                     designerDesignsList.add(dd);
                 }
                 adapter.swapData(designerDesignsList);
-
-
+                refreshLayout.setRefreshing(false);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                refreshLayout.setRefreshing(false);
             }
         });
     }
@@ -145,13 +176,13 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
                     "This app needs to use your camera and read storage. Please accept all permissions else app will misbehave",
                     PERMISSIONS_REQUEST_CODE,
                     Manifest.permission.CAMERA,
-                    Manifest.permission.READ_EXTERNAL_STORAGE);
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
     }
 
     @OnClick(R.id.new_design_button)
     public void newDesign() {
-        requestCameraPermission();
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
         final EditText input = new EditText(getContext());
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -192,7 +223,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
         startActivityForResult(intent, CAMERA);
     }
 
-    public static void uploadFile(Uri contentURI, Context context, String templateTitle, boolean isUpdate, String key) {
+    public static void uploadFile(Uri contentURI, Context context, String templateTitle, boolean isUpdate, String key, DesignerDesigns designerDesigns) {
         if (contentURI != null) {
             StorageReference imageRef = FirebaseStorage.getInstance().getReference().child("designer/designs" + templateTitle);
             UploadTask uploadTask = imageRef.putFile(contentURI);
@@ -229,7 +260,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
                     Uri imageDownloadUri = task.getResult();
                     assert imageDownloadUri != null;
                     if (isUpdate)
-                        updateTemplateDetails(context, dialog, key, imageDownloadUri);
+                        updateTemplateDetails(context, dialog, key, imageDownloadUri, designerDesigns);
                     else
                         saveDetailsToDatabase(dialog, templateTitle, imageDownloadUri, context);
                 } else {
@@ -240,9 +271,10 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
         }
     }
 
-    public static void updateTemplateDetails(Context context, AlertDialog dialog, String id, Uri imageUri) {
+    public static void updateTemplateDetails(Context context, AlertDialog dialog, String id, Uri imageUri, DesignerDesigns designerDesigns) {
+        designerDesigns.setImageUrl(imageUri.toString());
         DatabaseReference designRef = FirebaseDatabase.getInstance().getReference("designer/designs").child(id);
-        designRef.child("imageUrl").setValue(imageUri.toString()).addOnCompleteListener(task -> {
+        designRef.setValue(designerDesigns.toMap()).addOnCompleteListener(task -> {
             dialog.cancel();
             if (task.isSuccessful()) {
                 Toast.makeText(context, "Design Updated Successfully", Toast.LENGTH_LONG).show();
@@ -297,7 +329,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
                 contentURI = data.getData();
                 try {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
-                    uploadFile(contentURI, getContext(), templateTitle, false, null);
+                    uploadFile(contentURI, getContext(), templateTitle, false, null, null);
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -332,7 +364,19 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
                 ft.remove(prev);
             }
             DesignEditorFragment.NewInstance(designerDesigns).show(ft, "edit");
+        } else {
+            if (!designerDesigns.isCanEdit()) {
+                showText("Please wait till image is fully downloaded before editing");
+                return;
+            }
+            showEditImageActivity.showEditImageActivity(designerDesigns);
         }
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        showEditImageActivity = (Listeners.ShowEditImageActivity) context;
     }
 
     public class DesignerAdapter extends RecyclerView.Adapter<DesignerAdapter.DesignViewHolder> {
@@ -359,19 +403,74 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
         public void onBindViewHolder(@NonNull DesignViewHolder holder, int position) {
             DesignerDesigns designerDesigns = designerDesignsList.get(getItemCount() - position - 1);
             holder.templateTitleView.setText(designerDesigns.getTemplateName());
-            Picasso.get().load(designerDesigns.getImageUrl())
-                    .into(holder.templateImageView);
+            String imageSaveName = designerDesigns.templateName.concat(String.valueOf(designerDesigns.dateUploaded));
+            holder.imageIndicator.setText(getString(R.string.loading_image));
+            holder.imageIndicator.setVisibility(View.VISIBLE);
+            holder.imageIndicator.setOnClickListener(v -> loadImage(designerDesigns, holder));
+            loadImage(designerDesigns, holder);
 
+            /*holder.imageIndicator.setOnClickListener(v -> {
+                downloadImage(designerDesigns.imageUrl, holder.templateImageView, holder.imageIndicator, imageSaveName, designerDesigns);
+            });
+
+            if (isDesigner) {
+
+            } else {
+                try {
+                    File n = new File(Environment.getExternalStorageDirectory() + DESIGN_PATH + "/" + designerDesigns.templateName + designerDesigns.dateUploaded + ".png");
+                    Bitmap b = BitmapFactory.decodeStream(new FileInputStream(n));
+                    if (b == null)
+                        downloadImage(designerDesigns.imageUrl, holder.templateImageView, holder.imageIndicator, imageSaveName, designerDesigns);
+                    else {
+                        holder.templateImageView.setImageBitmap(b);
+                        holder.imageIndicator.setVisibility(View.INVISIBLE);
+                        designerDesigns.setCanEdit(true);
+                    }
+
+                } catch (FileNotFoundException e) {
+                    downloadImage(designerDesigns.imageUrl, holder.templateImageView, holder.imageIndicator, imageSaveName, designerDesigns);
+                    e.printStackTrace();
+                    Log.e(TAG, "File not found " + e.getLocalizedMessage());
+                }
+
+            }*/
+        }
+
+        private void loadImage(DesignerDesigns designerDesigns, DesignViewHolder holder) {
+            Picasso.get().load(designerDesigns.getImageUrl())
+                    .into(holder.templateImageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            holder.imageIndicator.setVisibility(View.GONE);
+                            designerDesigns.setCanEdit(true);
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            holder.imageIndicator.setVisibility(View.VISIBLE);
+                            holder.imageIndicator.setText(getString(R.string.tap_to_retry));
+                            designerDesigns.setCanEdit(false);
+                        }
+                    });
+        }
+
+        private void downloadImage(String url, ImageView view, Button imageIndicator, String imgName, DesignerDesigns design) {
+            imageIndicator.setText(getString(R.string.load));
+            imageIndicator.setVisibility(View.VISIBLE);
             Target target = new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    // loading of the bitmap was a success
-                    // TODO do some action with the bitmap
+                    view.setImageBitmap(bitmap);
+                    imageIndicator.setVisibility(View.INVISIBLE);
+                    storeImage(bitmap, imgName, design);
                 }
 
+                @SuppressLint("SetTextI18n")
                 @Override
                 public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
+                    Toast.makeText(getContext(), "Can't load image", Toast.LENGTH_SHORT).show();
+                    imageIndicator.setText("An Error Occurred, Tap to retry");
+                    imageIndicator.setVisibility(View.VISIBLE);
                 }
 
                 @Override
@@ -379,6 +478,41 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
 
                 }
             };
+            Picasso.get().load(url)
+                    .into(target);
+        }
+
+        private void storeImage(Bitmap image, String imageName, DesignerDesigns designerDesign) {
+            Log.e(TAG, "Start saving");
+            File pictureFile = getOutputMediaFile(imageName);
+            if (pictureFile == null) {
+                Log.e(TAG, "Error creating media file, check storage permissions: ");// e.getMessage());
+                return;
+            }
+            try {
+                FileOutputStream fos = new FileOutputStream(pictureFile);
+                image.compress(Bitmap.CompressFormat.PNG, 90, fos);
+                fos.close();
+                Log.e(TAG, "File stored");
+                designerDesign.setCanEdit(true);
+            } catch (FileNotFoundException e) {
+                Log.d(TAG, "File not found: " + e.getMessage());
+            } catch (IOException e) {
+                Log.d(TAG, "Error accessing file: " + e.getMessage());
+            }
+        }
+
+        private File getOutputMediaFile(String mImageName) {
+            File mediaStorageDir = new File(Environment.getExternalStorageDirectory() + DESIGN_PATH);
+            if (!mediaStorageDir.exists()) {
+                if (!mediaStorageDir.mkdirs()) {
+                    return null;
+                }
+            }
+            File mediaFile;
+            mImageName = mImageName.concat(".png");
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
+            return mediaFile;
         }
 
         @Override
@@ -396,6 +530,8 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
             ImageView templateImageView;
             @BindView(R.id.template_title)
             TextView templateTitleView;
+            @BindView(R.id.image_indicator)
+            Button imageIndicator;
 
             DesignViewHolder(@NonNull View itemView) {
                 super(itemView);

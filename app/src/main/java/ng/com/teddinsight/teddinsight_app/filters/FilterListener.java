@@ -1,4 +1,4 @@
-package com.burhanrashid52.imageeditor.filters;
+package ng.com.teddinsight.teddinsight_app.filters;
 
 import ja.burhanrashid52.photoeditor.PhotoFilter;
 

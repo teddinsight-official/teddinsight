@@ -102,7 +102,7 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
 
     @OnClick(R.id.save)
     void saveNew(){
-        DesignerHomeFragment.uploadFile(contentURI, getContext(), designerDesigns.getTemplateName(), true, designerDesigns.getId());
+        DesignerHomeFragment.uploadFile(contentURI, getContext(), designerDesigns.getTemplateName(), true, designerDesigns.getId(), designerDesigns);
         changesMade = false;
     }
 

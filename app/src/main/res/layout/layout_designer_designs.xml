@@ -3,34 +3,49 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layout_margin="4dp"
     app:cardElevation="5dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <ImageView
-            android:scaleType="centerInside"
             android:id="@+id/template_image"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="200dp"
-            android:src="@drawable/ic_tedd"
+            android:scaleType="centerCrop"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/template_title" />
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/image_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:fontFamily="@font/montserrat"
+            android:padding="8dp"
+            android:textAllCaps="false"
+            android:textColor="@color/colorPrimaryDark"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@id/template_image"
+            app:layout_constraintLeft_toLeftOf="@id/template_image"
+            app:layout_constraintRight_toRightOf="@id/template_image"
+            app:layout_constraintTop_toTopOf="@id/template_image"
+            tools:text="Loading Image, Please Wait!" />
 
         <TextView
             android:id="@+id/template_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="18dp"
+            android:fontFamily="@font/montserrat"
             android:gravity="center_horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            android:padding="4dp"
+            app:layout_constraintBottom_toBottomOf="@id/template_image"
+            app:layout_constraintLeft_toRightOf="@id/template_image"
+            app:layout_constraintTop_toTopOf="@id/template_image"
             tools:text="WCW" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

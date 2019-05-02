@@ -1,15 +1,19 @@
-package com.burhanrashid52.imageeditor;
+package ng.com.teddinsight.teddinsight_app.fragments;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetDialogFragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
+
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import ng.com.teddinsight.teddinsight_app.R;
+import ng.com.teddinsight.teddinsight_app.adapter.ColorPickerAdapter;
 
 public class PropertiesBSFragment extends BottomSheetDialogFragment implements SeekBar.OnSeekBarChangeListener {
 
@@ -51,13 +55,10 @@ public class PropertiesBSFragment extends BottomSheetDialogFragment implements S
         rvColor.setLayoutManager(layoutManager);
         rvColor.setHasFixedSize(true);
         ColorPickerAdapter colorPickerAdapter = new ColorPickerAdapter(getActivity());
-        colorPickerAdapter.setOnColorPickerClickListener(new ColorPickerAdapter.OnColorPickerClickListener() {
-            @Override
-            public void onColorPickerClickListener(int colorCode) {
-                if (mProperties != null) {
-                    dismiss();
-                    mProperties.onColorChanged(colorCode);
-                }
+        colorPickerAdapter.setOnColorPickerClickListener(colorCode -> {
+            if (mProperties != null) {
+                dismiss();
+                mProperties.onColorChanged(colorCode);
             }
         });
         rvColor.setAdapter(colorPickerAdapter);

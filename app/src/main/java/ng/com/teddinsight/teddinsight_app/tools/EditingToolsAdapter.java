@@ -1,24 +1,21 @@
-package com.burhanrashid52.imageeditor.tools;
+package ng.com.teddinsight.teddinsight_app.tools;
 
-import android.support.annotation.NonNull;
-import android.support.v4.util.Pair;
-import android.support.v7.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.burhanrashid52.imageeditor.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author <a href="https://github.com/burhanrashid52">Burhanuddin Rashid</a>
- * @version 0.1.2
- * @since 5/23/2018
- */
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import ng.com.teddinsight.teddinsight_app.R;
+
+
 public class EditingToolsAdapter extends RecyclerView.Adapter<EditingToolsAdapter.ViewHolder> {
 
     private List<ToolModel> mToolList = new ArrayList<>();

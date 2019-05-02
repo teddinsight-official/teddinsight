@@ -1,14 +1,12 @@
 package ng.com.teddinsight.teddinsight_app.application;
 
-import android.app.AlertDialog;
+
 import android.app.Application;
-
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
+import com.downloader.PRDownloader;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -20,11 +18,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
-import java.util.Map;
-
 import androidx.annotation.NonNull;
-import ng.com.teddinsight.teddinsight_app.activities.MainActivity;
-import ng.com.teddinsight.teddinsight_app.models.User;
+import io.fabric.sdk.android.Fabric;
+import ng.com.teddinsight.teddinsight_app.activities.LoginActivity;
+import ng.com.teddinsight.teddinsightchat.models.User;
 
 public class AppApplication extends Application {
 
@@ -39,7 +36,9 @@ public class AppApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         sPhotoApp = this;
+        PRDownloader.initialize(getApplicationContext());
         if (!FirebaseApp.getApps(this).isEmpty()) {
             FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         }
@@ -62,7 +61,8 @@ public class AppApplication extends Application {
                     assert userInfo != null;
                     if (!userInfo.hasAccess) {
                         FirebaseAuth.getInstance().signOut();
-                        Intent i = new Intent(getBaseContext(), MainActivity.class);
+                        Intent i = new Intent(getBaseContext(), LoginActivity.class);
+                        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         i.putExtra("revoked", "revoke");
                         startActivity(i);
                     }

@@ -6,4 +6,51 @@
     <dimen name="editor_size">35dp</dimen>
     <dimen name="normal_margin">8dp</dimen>
     <dimen name="large_margin">16dp</dimen>
+    <dimen name="space_small">8dp</dimen>
+    <dimen name="space_avg">16dp</dimen>
+    <dimen name="space_big">32dp</dimen>
+
+    <dimen name="padding_min">4dp</dimen>
+    <dimen name="padding_small">8dp</dimen>
+    <dimen name="padding_avg">16dp</dimen>
+    <dimen name="padding_big">32dp</dimen>
+
+    <dimen name="margin_min">4dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_avg">16dp</dimen>
+    <dimen name="margin_big">32dp</dimen>
+    <dimen name="margin_huge">64dp</dimen>
+
+    <dimen name="user_icon_width">36dp</dimen>
+    <dimen name="user_icon_height">36dp</dimen>
+
+    <dimen name="card_corner_radius">4dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="dots_height">30dp</dimen>
+    <dimen name="dots_margin_bottom">20dp</dimen>
+
+    <dimen name="frame_margin_top">150dp</dimen>
+    <dimen name="sign_in_margin_top">36dp</dimen>
+
+    <dimen name="activityPadding">16dp</dimen>
+    <dimen name="placeholderImage">60dp</dimen>
+    <dimen name="placeholderTextHeight">8dp</dimen>
+    <dimen name="padding_10">10dp</dimen>
+    <dimen name="text_size_title">18sp</dimen>
+    <dimen name="text_size_primary">16sp</dimen>
+    <dimen name="text_size_secondary">14sp</dimen>
+    <dimen name="text_size_small">12sp</dimen>
+    <dimen name="text_size_primary_big">20sp</dimen>
+    <dimen name="text_size_primary_huge">26sp</dimen>
+
+    <dimen name="simple_padding_tiny">2dp</dimen>
+    <dimen name="simple_padding_small">4dp</dimen>
+    <dimen name="simple_padding_medium">8dp</dimen>
+    <dimen name="simple_padding_largish">12dp</dimen>
+    <dimen name="simple_padding_large">16dp</dimen>
+    <dimen name="simple_padding_larger">32dp</dimen>
+    <dimen name="simple_padding_huge">56dp</dimen>
+
+    <dimen name="toolbar_progress_size">24dp</dimen>
+
 </resources>

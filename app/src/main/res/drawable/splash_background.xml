@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item>
+        <shape>
+            <gradient
+                android:startColor="#0096e8"
+                android:endColor="#0082bf"
+                android:centerColor="#0096e8"
+                android:angle="270"/>
+        </shape>
+    </item>
+
+    <item>
+        <bitmap android:src="@drawable/ic_tedd_copy"
+            android:tileMode="disabled"
+            android:gravity="center"
+            android:layout_gravity="center" />
+    </item>
+
+</layer-list>

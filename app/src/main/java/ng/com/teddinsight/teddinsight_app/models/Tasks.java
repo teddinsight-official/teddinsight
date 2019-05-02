@@ -20,8 +20,16 @@ public class Tasks implements Parcelable {
     public long dueDate;
     public int status;
     public boolean isDesigner;
+    public boolean reminderSet;
+    private int pendingIntentId;
+    public static final int TASK_COMPLETE = 1;
+    public static final int TASK_INCOMPLETE = 0;
 
     public Tasks() {
+    }
+
+    public static String getTableName() {
+        return "tasks";
     }
 
     public Tasks(String id, String taskTitle, String taskDescription, String assignedBy, long dueDate) {
@@ -30,6 +38,14 @@ public class Tasks implements Parcelable {
         this.taskDescription = taskDescription;
         this.assignedBy = assignedBy;
         this.dueDate = dueDate;
+    }
+
+    public int getPendingIntentId() {
+        return pendingIntentId;
+    }
+
+    public void setPendingIntentId(int pendingIntentId) {
+        this.pendingIntentId = pendingIntentId;
     }
 
     protected Tasks(Parcel in) {
@@ -41,6 +57,8 @@ public class Tasks implements Parcelable {
         dueDate = in.readLong();
         status = in.readInt();
         isDesigner = in.readByte() != 0;
+        reminderSet = in.readByte() != 0;
+        pendingIntentId = in.readInt();
     }
 
     public static final Creator<Tasks> CREATOR = new Creator<Tasks>() {
@@ -120,7 +138,7 @@ public class Tasks implements Parcelable {
         res.put("assignedBy", this.assignedBy);
         res.put("assignedOn", ServerValue.TIMESTAMP);
         res.put("dueDate", this.dueDate);
-        res.put("status", 1);
+        res.put("status", TASK_INCOMPLETE);
         return res;
     }
 
@@ -139,5 +157,7 @@ public class Tasks implements Parcelable {
         dest.writeLong(dueDate);
         dest.writeInt(status);
         dest.writeByte((byte) (isDesigner ? 1 : 0));
+        dest.writeByte((byte) (reminderSet ? 1 : 0));
+        dest.writeInt(pendingIntentId);
     }
 }

@@ -1,8 +1,13 @@
 package ng.com.teddinsight.teddinsight_app.fragments;
 
+import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,12 +17,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
-import org.joda.time.LocalDate;
+
+import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,10 +34,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ng.com.teddinsight.teddinsight_app.R;
-import ng.com.teddinsight.teddinsight_app.models.DesignerDesigns;
 import ng.com.teddinsight.teddinsight_app.models.Tasks;
+import ng.com.teddinsight.teddinsight_app.receivers.ReminderReceiver;
 import ng.com.teddinsight.teddinsight_app.utils.ExtraUtils;
-import ng.com.teddinsight.teddinsight_app.utils.TimeUtils;
+
+import static ng.com.teddinsight.teddinsight_app.fragments.TextEditorDialogFragment.TAG;
+import static ng.com.teddinsight.teddinsight_app.models.Tasks.TASK_COMPLETE;
 
 public class TaskDialog extends DialogFragment {
 
@@ -51,6 +60,9 @@ public class TaskDialog extends DialogFragment {
     @BindView(R.id.mark_done)
     Button markAsDoneButton;
     Tasks tasks;
+    public static final String REMINDER_INTENT_TASK_ID = "task_id";
+    private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    private DatabaseReference taskRef = FirebaseDatabase.getInstance().getReference().child(Tasks.getTableName()).child(user.getUid());
 
     public static TaskDialog NewInstance(Tasks tasks) {
         Bundle b = new Bundle();
@@ -83,25 +95,36 @@ public class TaskDialog extends DialogFragment {
         return view;
     }
 
+    public void setReminder() {
+        Log.e(TAG, "" + tasks.getPendingIntentId());
+        if (tasks.reminderSet || tasks.status == TASK_COMPLETE)
+            return;
+        AlarmManager manager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(getContext(), ReminderReceiver.class);
+        intent.putExtra(REMINDER_INTENT_TASK_ID, tasks.id);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), tasks.getPendingIntentId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + TimeUnit.MINUTES.toMillis(5), AlarmManager.INTERVAL_HALF_DAY, pendingIntent);
+        taskRef.child(tasks.id).child("reminderSet").setValue(true);
+    }
+
     private void initialize() {
         statusView.setText(ExtraUtils.getStatText(tasks.status));
-        assignedOn.setText(ExtraUtils.formatDate(tasks.getAssignedOn()));
+        assignedOn.setText(ExtraUtils.getHumanReadableString(tasks.getAssignedOn()));
         assignedByView.setText(tasks.assignedBy);
         descriptionView.setText(tasks.getTaskDescription());
-        dueDate.setText(ExtraUtils.formatDate(tasks.getDueDate() * 1000));
+        dueDate.setText(ExtraUtils.getHumanReadableString(tasks.getDueDate()));
         stat.setBackgroundColor(ExtraUtils.getColor(tasks.status));
         if (tasks.status == 1) {
             markAsDoneButton.setVisibility(View.GONE);
         }
-        TimeUtils utils = new TimeUtils(tasks.getDueDate() * 1000);
-        LocalDate localDate = new LocalDate();
         org.joda.time.DateTime n = new DateTime();
         n.withMillis(tasks.getDueDate() * 1000);
         DateTime f = new DateTime();
         f.withMillis(System.currentTimeMillis());
         Days d = Days.daysBetween(n, f);
         daysLeft.setText("" + d.getDays());
-
+        setReminder();
     }
 
     @OnClick(R.id.mark_done)
@@ -110,8 +133,7 @@ public class TaskDialog extends DialogFragment {
         progressDialog.setMessage("Please Wait...");
         progressDialog.show();
         String user = tasks.isDesigner ? "designer" : "content";
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(user + "/tasks/" + tasks.getId());
-        reference.child("status").setValue(0).addOnCompleteListener(task -> {
+        taskRef.child(tasks.id).child("status").setValue(TASK_COMPLETE).addOnCompleteListener(task -> {
             progressDialog.cancel();
             if (task.isSuccessful()) {
                 markAsDoneButton.setVisibility(View.GONE);
