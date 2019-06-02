@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:shimmer="http://schemas.android.com/apk/res-auto"
+    tools:context=".activities.HrHomeActivity">
+
+    <FrameLayout
+        android:id="@+id/header_frame"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@drawable/header"
+        app:layout_constraintBottom_toBottomOf="@id/position"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </FrameLayout>
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/profile_image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/circle_borderd"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="@id/hr_name" />
+
+    <TextView
+        android:id="@+id/hr_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/montserrat"
+        android:textColor="@color/white"
+        app:layout_constraintLeft_toRightOf="@id/profile_image"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Olumide Hr" />
+
+    <TextView
+        android:id="@+id/hr_mail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat"
+        android:textColor="@color/white"
+        app:layout_constraintLeft_toLeftOf="@id/hr_name"
+        app:layout_constraintTop_toBottomOf="@id/hr_name"
+        tools:text="hr@teddinsight.com" />
+
+    <TextView
+        android:id="@+id/position"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat"
+        android:paddingBottom="16dp"
+        android:text="@string/human_resource"
+        android:textColor="@color/white"
+        app:layout_constraintLeft_toLeftOf="@id/hr_name"
+        app:layout_constraintTop_toBottomOf="@id/hr_mail" />
+
+    <ImageView
+        android:id="@+id/notif_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="7dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:onClick="showStaffList"
+        android:src="@drawable/ic_chat"
+        app:layout_constraintRight_toRightOf="@id/notif_text"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/notif_text"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="18dp"
+        android:background="@drawable/circle_borderd"
+        android:fontFamily="@font/montserrat"
+        android:gravity="center"
+        android:text="10"
+        android:textColor="@color/white"
+        android:textSize="8sp"
+        android:visibility="invisible"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/user_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="100dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_frame">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmer_view_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_frame"
+        app:shimmer_duration="800"
+        >
+
+        <!-- Adding 7 rows of placeholders -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include layout="@layout/placeholder_data" />
+
+            <include layout="@layout/placeholder_data" />
+
+            <include layout="@layout/placeholder_data" />
+
+            <include layout="@layout/placeholder_data" />
+
+            <include layout="@layout/placeholder_data" />
+
+            <include layout="@layout/placeholder_data" />
+
+            <include layout="@layout/placeholder_data" />
+        </LinearLayout>
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addNewUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        app:srcCompat="@drawable/ic_add_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <Button
+        android:id="@+id/sign_out"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:fontFamily="@font/montserrat"
+        android:onClick="signOut"
+        android:text="@string/sign_out"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/header_frame"
+        app:layout_constraintRight_toRightOf="@id/header_frame"
+        tools:layout_editor_absoluteX="242dp"
+        tools:layout_editor_absoluteY="46dp" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

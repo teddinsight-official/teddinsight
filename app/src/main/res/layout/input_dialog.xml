@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    android:orientation="vertical"
+    android:padding="10dp"
+    tools:ignore="ExtraText">
+
+    <TextView
+        android:id="@+id/update_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="@color/colorPrimary"
+        android:fontFamily="@font/montserrat"
+        android:padding="4dp"
+        android:text="@string/update_staff_details"
+        android:textColor="@color/white" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/phone_number"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_old_typical_phone"
+            android:drawablePadding="8dp"
+            android:fontFamily="@font/montserrat"
+            android:hint="@string/phone_number"
+            android:inputType="phone"
+            android:padding="10dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+    I
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/home_address"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rect_grayoutline1"
+            android:drawablePadding="8dp"
+            android:fontFamily="@font/montserrat"
+            android:gravity="top|start"
+            android:hint="@string/address"
+            android:inputType="textMultiLine"
+            android:lines="4"
+            android:padding="10dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+    I
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/date_employed"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_calendar"
+            android:drawableLeft="@drawable/ic_calendar"
+            android:drawablePadding="8dp"
+            android:focusable="false"
+            android:fontFamily="@font/montserrat"
+            android:hint="@string/date_employed"
+            android:inputType="date"
+            android:padding="10dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+    I
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/salary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_payment_method"
+            android:drawablePadding="8dp"
+            android:fontFamily="@font/montserrat"
+            android:hint="@string/salary_month"
+            android:inputType="numberDecimal"
+            android:padding="10dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+</LinearLayout>

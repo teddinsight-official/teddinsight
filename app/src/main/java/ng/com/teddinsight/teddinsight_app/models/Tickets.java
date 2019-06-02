@@ -21,11 +21,12 @@ public class Tickets implements Parcelable {
     public boolean reviewed;
     public String category;
     public String status;
+    public String senderName;
 
     public Tickets() {
     }
 
-    public Tickets(String id, String title, String description, String openedBy, String category) {
+    public Tickets(String id, String title, String description, String openedBy, String category, String businessName) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -33,6 +34,7 @@ public class Tickets implements Parcelable {
         this.category = category;
         this.reviewed = false;
         this.status = "open";
+        this.senderName = senderName;
     }
 
 
@@ -47,6 +49,7 @@ public class Tickets implements Parcelable {
         reviewed = in.readByte() != 0;
         category = in.readString();
         status = in.readString();
+        senderName = in.readString();
     }
 
     public static final Creator<Tickets> CREATOR = new Creator<Tickets>() {
@@ -74,8 +77,7 @@ public class Tickets implements Parcelable {
         map.put("category", category);
         map.put("reviewed", reviewed);
         map.put("status", status);
-
-
+        map.put("senderName", senderName);
         return map;
     }
 
@@ -96,5 +98,6 @@ public class Tickets implements Parcelable {
         dest.writeByte((byte) (reviewed ? 1 : 0));
         dest.writeString(category);
         dest.writeString(status);
+        dest.writeString(senderName);
     }
 }

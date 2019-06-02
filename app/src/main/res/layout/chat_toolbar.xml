@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context=".activities.DesignerHomeActivity">
+    tools:context=".activities.DCSHomeActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/activity_main_toolbar"

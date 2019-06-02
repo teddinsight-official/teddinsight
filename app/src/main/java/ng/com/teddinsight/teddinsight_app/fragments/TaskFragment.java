@@ -1,5 +1,6 @@
 package ng.com.teddinsight.teddinsight_app.fragments;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -54,6 +55,7 @@ public class TaskFragment extends Fragment implements Listeners.TaskItemClicked 
     boolean isDesigner;
     String user;
     FirebaseUser firebaseUser;
+    private Context mContext;
 
     public static Fragment NewInstance() {
         return new TaskFragment();
@@ -80,7 +82,7 @@ public class TaskFragment extends Fragment implements Listeners.TaskItemClicked 
         }
         reference = FirebaseDatabase.getInstance().getReference(Tasks.getTableName()).child(firebaseUser.getUid());
         adapter = new TaskAdapter(new ArrayList<>(), this);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         recyclerView.setAdapter(adapter);
         //jmkds();
         fetchTasks();
@@ -137,6 +139,12 @@ public class TaskFragment extends Fragment implements Listeners.TaskItemClicked 
         }
         TaskDialog.NewInstance(tasks).show(ft, "task");
 
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mContext = context;
     }
 
     public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {

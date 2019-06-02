@@ -50,6 +50,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class LoginActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
     private static final int RC_SIGN_IN = 100;
     private static final String TAG = LoginActivity.class.getCanonicalName();
+    public static final String STAFF_ROLE = "staff_role";
     FirebaseAuth mAuth;
     FirebaseUser mUser;
     FirebaseDatabase firebaseDatabase;
@@ -159,6 +160,25 @@ public class LoginActivity extends AppCompatActivity implements EasyPermissions.
 
     }
 
+    @OnClick(R.id.forgot_password)
+    public void sendPasswordResetMail() {
+        String email = emailEditTextView.getText().toString().trim();
+        if (TextUtils.isEmpty(email)) {
+            emailEditTextView.setError("Input your email");
+            Toast.makeText(this, "Input your email", Toast.LENGTH_LONG).show();
+            return;
+        }
+        dialog.setMessage("Sending password reset mail to "+email);
+        dialog.show();
+        mAuth.sendPasswordResetEmail(email).addOnCompleteListener(task -> {
+            dialog.dismiss();
+            if (task.isSuccessful())
+                Toast.makeText(getApplicationContext(), "Password reset mail sent to " + email, Toast.LENGTH_LONG).show();
+            else
+                Toast.makeText(getApplicationContext(), task.getException().getLocalizedMessage(), Toast.LENGTH_LONG).show();
+        });
+    }
+
     private void getUserDetailsFromDb() {
         String uid = mUser.getUid();
         ref.child("/" + User.getTableName() + "/" + uid).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -203,10 +223,19 @@ public class LoginActivity extends AppCompatActivity implements EasyPermissions.
         }
         switch (role) {
             case User.USER_DESIGNER:
-                redirect(DesignerHomeActivity.class);
+                redirect(DCSHomeActivity.class, role);
                 break;
             case User.USER_CONTENT:
-                redirect(DesignerHomeActivity.class);
+                redirect(DCSHomeActivity.class, role);
+                break;
+            case User.USER_HR:
+                redirect(HrHomeActivity.class, role);
+                break;
+            case User.USER_SOCIAL:
+                redirect(DCSHomeActivity.class, role);
+                break;
+            case User.USER_ADMIN:
+                redirect(AdminActivity.class, role);
                 break;
             default:
                 mUser = null;
@@ -217,8 +246,10 @@ public class LoginActivity extends AppCompatActivity implements EasyPermissions.
         }
     }
 
-    private void redirect(Class destination) {
-        startActivity(new Intent(this, destination));
+    private void redirect(Class destination, String staffRole) {
+        Intent intent = new Intent(this, destination);
+        intent.putExtra(STAFF_ROLE, staffRole);
+        startActivity(intent);
         finish();
     }
 

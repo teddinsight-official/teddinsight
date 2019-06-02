@@ -8,3 +8,7 @@
 -keepattributes Signature
 -keepattributes Exceptions
 -keep class ng.com.teddinsight.teddinsight_app.models.** { *; }
+# Parceler library
+-keep interface org.parceler.Parcel
+-keep @org.parceler.Parcel class * { *; }
+-keep class **$$Parcelable { *; }

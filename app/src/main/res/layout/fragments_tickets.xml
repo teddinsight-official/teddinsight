@@ -17,16 +17,15 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/new_ticket_button"
+    <TextView
+        android:id="@+id/no_tickets"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        app:fabCustomSize="64dp"
+        android:fontFamily="@font/montserrat"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:srcCompat="@drawable/ic_open_folder_with_document" />
+        app:layout_constraintTop_toTopOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

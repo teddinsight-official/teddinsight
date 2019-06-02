@@ -38,16 +38,6 @@
         android:orientation="horizontal"
         android:weightSum="10">
 
-        <ImageButton
-            android:id="@+id/chat_add_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:alpha="0.5"
-            android:background="@android:color/white"
-            android:padding="10dp"
-            app:srcCompat="@drawable/ic_battery" />
-
         <EditText
             android:id="@+id/chat_message_view"
             android:layout_width="wrap_content"
@@ -55,23 +45,26 @@
             android:layout_weight="8"
             android:background="@android:color/white"
             android:ems="10"
+            android:fontFamily="@font/montserrat"
             android:hint="Enter Message..."
             android:inputType="textMultiLine"
             android:maxHeight="70dp"
             android:paddingLeft="10dp"
             android:paddingTop="14dp"
             android:paddingRight="10dp"
-            android:paddingBottom="12dp" />
+            android:paddingBottom="12dp"
+            android:textSize="12sp" />
 
         <ImageButton
             android:id="@+id/chat_send_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:alpha="0.5"
             android:background="@android:color/white"
-            android:padding="10dp"
-            app:srcCompat="@drawable/ic_telemarketer" />
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            app:srcCompat="@drawable/ic_right_arrow" />
     </LinearLayout>
 
 

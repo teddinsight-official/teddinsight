@@ -4,9 +4,14 @@ package ng.com.teddinsight.teddinsight_app.application;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.util.Log;
+import android.widget.ImageView;
 
 import com.crashlytics.android.Crashlytics;
 import com.downloader.PRDownloader;
+import com.evernote.android.state.StateSaver;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -15,10 +20,17 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
+import com.mikepenz.materialdrawer.util.DrawerImageLoader;
 import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
+import com.twitter.sdk.android.core.Twitter;
 
 import androidx.annotation.NonNull;
+import androidx.multidex.MultiDex;
+
+import java.io.File;
+
 import io.fabric.sdk.android.Fabric;
 import ng.com.teddinsight.teddinsight_app.activities.LoginActivity;
 import ng.com.teddinsight.teddinsightchat.models.User;
@@ -27,17 +39,22 @@ public class AppApplication extends Application {
 
     private static AppApplication sPhotoApp;
     private static final String TAG = AppApplication.class.getSimpleName();
+    private static AppApplication instance;
 
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+        MultiDex.install(this);
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
+        Twitter.initialize(this);
+        StateSaver.setEnabledForAllActivitiesAndSupportFragments(this, true);
         sPhotoApp = this;
+        instance = sPhotoApp;
         PRDownloader.initialize(getApplicationContext());
         if (!FirebaseApp.getApps(this).isEmpty()) {
             FirebaseDatabase.getInstance().setPersistenceEnabled(true);
@@ -49,6 +66,19 @@ public class AppApplication extends Application {
         built.setIndicatorsEnabled(true);
         built.setLoggingEnabled(true);
         Picasso.setSingletonInstance(built);
+
+        DrawerImageLoader.init(new AbstractDrawerImageLoader() {
+            @Override
+            public void set(ImageView imageView, Uri uri, Drawable placeholder) {
+                Picasso.get().load(uri).placeholder(placeholder).into(imageView);
+            }
+
+            @Override
+            public void cancel(ImageView imageView) {
+                Picasso.get().cancelRequest(imageView);
+            }
+        });
+
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -76,8 +106,37 @@ public class AppApplication extends Application {
         }
     }
 
-    public static AppApplication getPhotoApp() {
-        return sPhotoApp;
+    public void clearApplicationData() {
+        File cacheDirectory = getCacheDir();
+        File applicationDirectory = new File(cacheDirectory.getParent());
+        if (applicationDirectory.exists()) {
+            String[] fileNames = applicationDirectory.list();
+            for (String fileName : fileNames) {
+                if (!fileName.equals("lib")) {
+                    deleteFile(new File(applicationDirectory, fileName));
+                }
+            }
+        }
+    }
+
+    public static boolean deleteFile(File file) {
+        boolean deletedAll = true;
+        if (file != null) {
+            if (file.isDirectory()) {
+                String[] children = file.list();
+                for (int i = 0; i < children.length; i++) {
+                    deletedAll = deleteFile(new File(file, children[i])) && deletedAll;
+                }
+            } else {
+                deletedAll = file.delete();
+            }
+        }
+
+        return deletedAll;
+    }
+
+    public static AppApplication getInstance() {
+        return instance;
     }
 
     public Context getContext() {

@@ -1,10 +1,18 @@
 package ng.com.teddinsight.teddinsight_app.utils;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,6 +31,13 @@ public class ExtraUtils {
                     (l + " cannot be cast to int without changing its value.");
         }
         return (int) l;
+    }
+
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     public static String formatDate(long milliseconds) /* This is your topStory.getTime()*1000 */ {
@@ -62,7 +77,7 @@ public class ExtraUtils {
     }
 
     public static String getHumanReadableString(long timestamp) {
-        DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy, HH:mm a", Locale.ENGLISH);
+        DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy, hh:mm a", Locale.ENGLISH);
         return df.format(new Date(timestamp));
     }
 
@@ -72,7 +87,7 @@ public class ExtraUtils {
         if (noTime)
             format = "EEE, d MMM yyyy";
         else
-            format = "EEE, d MMM yyyy, HH:mm a";
+            format = "EEE, d MMM yyyy, hh:mm a";
         DateFormat df = new SimpleDateFormat(format, Locale.ENGLISH);
         return df.format(new Date(timestamp));
     }
@@ -106,5 +121,17 @@ public class ExtraUtils {
             return diff / DAY_MILLIS + " days ago";
         }
     }
+
+    public static void createInstagramIntent(Activity activity, String mediaPath) {
+        Intent share = new Intent(Intent.ACTION_SEND);
+        String type = "image/*";
+        share.setType(type);
+        Log.e("TAG", mediaPath);
+        File media = new File(mediaPath);
+        Uri uri = Uri.fromFile(media);
+        share.putExtra(Intent.EXTRA_STREAM, uri);
+        activity.startActivity(Intent.createChooser(share, "Select Instagram"));
+    }
+
 
 }

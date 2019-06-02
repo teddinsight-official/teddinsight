@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -27,20 +26,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -53,14 +48,10 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
-import org.w3c.dom.Text;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,6 +59,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -95,6 +87,14 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
         return new DesignerHomeFragment();
     }
 
+    public static DesignerHomeFragment NewInstance(String role) {
+        Bundle bundle = new Bundle();
+        bundle.putString("role", role);
+        DesignerHomeFragment designerHomeFragment = new DesignerHomeFragment();
+        designerHomeFragment.setArguments(bundle);
+        return designerHomeFragment;
+    }
+
     @BindView(R.id.designs_grid)
     RecyclerView designGrid;
     @BindView(R.id.new_design_button)
@@ -114,11 +114,13 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
     SharedPreferences preferences;
     String path = "/TeddinsightDnC/Images";
     Listeners.ShowEditImageActivity showEditImageActivity;
+    private Context mContext;
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_home_designer, container, false);
+        View v = inflater.inflate(R.layout.fragment_home_dcs, container, false);
         ButterKnife.bind(this, v);
         return v;
     }
@@ -127,11 +129,13 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         requestCameraPermission();
-        preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         refreshLayout.setRefreshing(true);
         refreshLayout.setColorSchemeColors(Color.RED, Color.BLUE, Color.GREEN, Color.CYAN);
         refreshLayout.setOnRefreshListener(this::getDesigns);
-        isNotDesign = preferences.getString("role", "Content").equals(User.USER_CONTENT);
+        Bundle bundle = getArguments();
+        if (bundle != null && bundle.containsKey("role"))
+            isNotDesign = bundle.getString("role", User.USER_DESIGNER).equals(User.USER_CONTENT);
         if (isNotDesign) {
             homeTitle.setText(User.USER_CONTENT);
             designTitle.setText(getString(R.string.adoi));
@@ -140,8 +144,8 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
             homeTitle.setText(User.USER_DESIGNER);
             designTitle.setText(getString(R.string.upload_designs));
         }
-        designRef = FirebaseDatabase.getInstance().getReference("designer/designs");
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        designRef = FirebaseDatabase.getInstance().getReference(DesignerDesigns.DESIGNS);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
         designGrid.setLayoutManager(linearLayoutManager);
         adapter = new DesignerAdapter(!isNotDesign, this);
         designGrid.setAdapter(adapter);
@@ -149,7 +153,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
     }
 
     private void getDesigns() {
-        designRef.orderByChild("isUpdated").equalTo(false).addValueEventListener(new ValueEventListener() {
+        designRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 List<DesignerDesigns> designerDesignsList = new ArrayList<>();
@@ -169,7 +173,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
     }
 
     private void requestCameraPermission() {
-        if (!EasyPermissions.hasPermissions(getContext(),
+        if (!EasyPermissions.hasPermissions(mContext,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE)) {
             EasyPermissions.requestPermissions(this,
@@ -183,8 +187,8 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
 
     @OnClick(R.id.new_design_button)
     public void newDesign() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
-        final EditText input = new EditText(getContext());
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+        final EditText input = new EditText(mContext);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
@@ -207,7 +211,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
 
 
     private void showText(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+        Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
     }
 
 
@@ -274,7 +278,8 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
     public static void updateTemplateDetails(Context context, AlertDialog dialog, String id, Uri imageUri, DesignerDesigns designerDesigns) {
         designerDesigns.setImageUrl(imageUri.toString());
         DatabaseReference designRef = FirebaseDatabase.getInstance().getReference("designer/designs").child(id);
-        designRef.setValue(designerDesigns.toMap()).addOnCompleteListener(task -> {
+        designerDesigns.setVisibleToAdmin(true);
+        designRef.setValue(designerDesigns).addOnCompleteListener(task -> {
             dialog.cancel();
             if (task.isSuccessful()) {
                 Toast.makeText(context, "Design Updated Successfully", Toast.LENGTH_LONG).show();
@@ -328,12 +333,12 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
             if (data != null) {
                 contentURI = data.getData();
                 try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
-                    uploadFile(contentURI, getContext(), templateTitle, false, null, null);
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(mContext.getContentResolver(), contentURI);
+                    uploadFile(contentURI, mContext, templateTitle, false, null, null);
 
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Toast.makeText(getContext(), "Failed!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Failed!", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -347,7 +352,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
 
     @Override
     public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
-        Toast.makeText(getContext(), "You must accept all permissions to enable all app features", Toast.LENGTH_LONG).show();
+        Toast.makeText(mContext, "You must accept all permissions to enable all app features", Toast.LENGTH_LONG).show();
         if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
             new AppSettingsDialog.Builder(this).build().show();
         }
@@ -377,6 +382,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         showEditImageActivity = (Listeners.ShowEditImageActivity) context;
+        this.mContext = context;
     }
 
     public class DesignerAdapter extends RecyclerView.Adapter<DesignerAdapter.DesignViewHolder> {
@@ -468,7 +474,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
                 @SuppressLint("SetTextI18n")
                 @Override
                 public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                    Toast.makeText(getContext(), "Can't load image", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Can't load image", Toast.LENGTH_SHORT).show();
                     imageIndicator.setText("An Error Occurred, Tap to retry");
                     imageIndicator.setVisibility(View.VISIBLE);
                 }

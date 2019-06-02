@@ -1,16 +1,17 @@
 package ng.com.teddinsight.teddinsight_app.models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.ServerValue;
+
+import org.parceler.Parcel;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DesignerDesigns implements Parcelable {
+@Parcel(Parcel.Serialization.BEAN)
+public class DesignerDesigns {
 
     public String id;
     public String templateName;
@@ -19,6 +20,13 @@ public class DesignerDesigns implements Parcelable {
     public long dateUploaded;
     public long invertedDateUploaded;
     public boolean canEdit = false;
+    public String status;
+    private boolean visibleToAdmin;
+    public static final String DESIGNS = "designer/designs";
+    public static final String APPROVED_DESIGNS = "approvedDesigns";
+    public static final String STATUS_APPROVED = "approved";
+    public static final String STATUS_DISAPPROVED = "disapproved";
+    public static final String STATUS_PENDING = "pending";
 
     public DesignerDesigns() {
     }
@@ -30,43 +38,13 @@ public class DesignerDesigns implements Parcelable {
         this.imageUrl = imageUrl;
     }
 
-    protected DesignerDesigns(Parcel in) {
-        id = in.readString();
-        templateName = in.readString();
-        isUpdated = in.readByte() != 0;
-        imageUrl = in.readString();
-        dateUploaded = in.readLong();
-        invertedDateUploaded = in.readLong();
-        canEdit = in.readByte() != 0;
+    public boolean isVisibleToAdmin() {
+        return visibleToAdmin;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id);
-        dest.writeString(templateName);
-        dest.writeByte((byte) (isUpdated ? 1 : 0));
-        dest.writeString(imageUrl);
-        dest.writeLong(dateUploaded);
-        dest.writeLong(invertedDateUploaded);
-        dest.writeByte((byte) (canEdit ? 1 : 0));
+    public void setVisibleToAdmin(boolean visibleToAdmin) {
+        this.visibleToAdmin = visibleToAdmin;
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<DesignerDesigns> CREATOR = new Creator<DesignerDesigns>() {
-        @Override
-        public DesignerDesigns createFromParcel(Parcel in) {
-            return new DesignerDesigns(in);
-        }
-
-        @Override
-        public DesignerDesigns[] newArray(int size) {
-            return new DesignerDesigns[size];
-        }
-    };
 
     public boolean isCanEdit() {
         return canEdit;
@@ -80,7 +58,7 @@ public class DesignerDesigns implements Parcelable {
         return id;
     }
 
-    public void setId(String  id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -118,6 +96,7 @@ public class DesignerDesigns implements Parcelable {
         o.put("id", this.id);
         o.put("dateUploaded", ServerValue.TIMESTAMP);
         o.put("invertedDateUploaded", -1 * new Date().getTime());
+        o.put("visibleToAdmin", true);
         return o;
     }
 

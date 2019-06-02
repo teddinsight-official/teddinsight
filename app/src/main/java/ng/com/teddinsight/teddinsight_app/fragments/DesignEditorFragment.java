@@ -36,6 +36,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 
+import org.parceler.Parcels;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -57,10 +59,11 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
     DesignerDesigns designerDesigns;
     Uri contentURI;
     boolean changesMade = false;
+    private Context mContext;
 
     public static DesignEditorFragment NewInstance(DesignerDesigns designerDesigns) {
         Bundle b = new Bundle();
-        b.putParcelable("design", designerDesigns);
+        b.putParcelable("design", Parcels.wrap(designerDesigns));
         DesignEditorFragment editorFragment = new DesignEditorFragment();
         editorFragment.setArguments(b);
         return editorFragment;
@@ -79,13 +82,13 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
         view = inflater.inflate(R.layout.fragment_dialog_design_edit, container, false);
         ButterKnife.bind(this, view);
         Bundle dd = getArguments();
-        designerDesigns = dd.getParcelable("design");
+        designerDesigns = Parcels.unwrap(dd.getParcelable("design"));
         Log.e(TAG, "id: "+designerDesigns.getId());
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_close_white_24dp);
         toolbar.setNavigationOnClickListener(v -> getDialog().dismiss());
         toolbar.setTitle(designerDesigns.getTemplateName());
-        toolbar.setTitleTextAppearance(getContext(), R.style.ToolbarTheme);
+        toolbar.setTitleTextAppearance(mContext, R.style.ToolbarTheme);
         initialize();
         return view;
     }
@@ -102,13 +105,13 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
 
     @OnClick(R.id.save)
     void saveNew(){
-        DesignerHomeFragment.uploadFile(contentURI, getContext(), designerDesigns.getTemplateName(), true, designerDesigns.getId(), designerDesigns);
+        DesignerHomeFragment.uploadFile(contentURI, mContext, designerDesigns.getTemplateName(), true, designerDesigns.getId(), designerDesigns);
         changesMade = false;
     }
-
+    
 
     private void requestCameraPermission() {
-        if (!EasyPermissions.hasPermissions(getContext(),
+        if (!EasyPermissions.hasPermissions(mContext,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE)) {
             EasyPermissions.requestPermissions(this,
@@ -144,12 +147,12 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
                 changesMade = true;
                 contentURI = data.getData();
                 try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), contentURI);
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(mContext.getContentResolver(), contentURI);
                     templateImageview.setImageBitmap(bitmap);
 
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Toast.makeText(getContext(), "Failed!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Failed!", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -163,7 +166,7 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
 
     @Override
     public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
-        Toast.makeText(getContext(), "You must accept all permissions to enable all app features", Toast.LENGTH_LONG).show();
+        Toast.makeText(mContext, "You must accept all permissions to enable all app features", Toast.LENGTH_LONG).show();
         if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
             new AppSettingsDialog.Builder(this).build().show();
         }
@@ -191,12 +194,13 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
     }
 
     private void showToast(String message, int duration) {
-        Toast.makeText(getContext(), message, duration).show();
+        Toast.makeText(mContext, message, duration).show();
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        mContext = context;
     }
 
     @Override
@@ -220,7 +224,7 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
                     }
                 };
                 if (changesMade) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                     builder.setMessage("You have unsaved changes!")
                             .setTitle("Warning")
                             .setPositiveButton("Continue Editing", clickListener)

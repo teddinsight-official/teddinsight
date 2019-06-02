@@ -46,6 +46,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.ChangeBounds;
 import androidx.transition.TransitionManager;
+
+import org.parceler.Parcels;
+
 import ja.burhanrashid52.photoeditor.OnPhotoEditorListener;
 import ja.burhanrashid52.photoeditor.OnSaveBitmap;
 import ja.burhanrashid52.photoeditor.PhotoEditor;
@@ -104,7 +107,7 @@ public class EditImageActivity extends BaseActivity implements OnPhotoEditorList
         setContentView(R.layout.activity_edit_image);
         if (!getIntent().hasExtra("design"))
             finish();
-        designerDesigns = getIntent().getParcelableExtra("design");
+        designerDesigns = Parcels.unwrap(getIntent().getParcelableExtra("design"));
 
         initViews();
 
@@ -163,6 +166,7 @@ public class EditImageActivity extends BaseActivity implements OnPhotoEditorList
             Target target = new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    Toast.makeText(getApplicationContext(), "image loaded", Toast.LENGTH_SHORT).show();
                     b = bitmap;
                     mPhotoEditorView.getSource().setImageBitmap(bitmap);
                 }
@@ -170,7 +174,7 @@ public class EditImageActivity extends BaseActivity implements OnPhotoEditorList
                 @SuppressLint("SetTextI18n")
                 @Override
                 public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                 }
 
                 @Override
@@ -348,6 +352,7 @@ public class EditImageActivity extends BaseActivity implements OnPhotoEditorList
 
     private void updateDetails() {
         DatabaseReference designRef = FirebaseDatabase.getInstance().getReference("designer/designs");
+        designerDesigns.setVisibleToAdmin(true);
         designRef.child(designerDesigns.id).updateChildren(designerDesigns.toMap()).addOnCompleteListener(task -> {
             hideLoading();
             if (task.isSuccessful()) {
@@ -416,6 +421,7 @@ public class EditImageActivity extends BaseActivity implements OnPhotoEditorList
                     break;
             }
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

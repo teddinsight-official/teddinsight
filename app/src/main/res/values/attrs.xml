@@ -6,4 +6,9 @@
         <attr name="metaButtonBarButtonStyle" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="TextViewDrawableSize">
+        <attr name="compoundDrawableWidth" format="dimension" />
+        <attr name="compoundDrawableHeight" format="dimension" />
+    </declare-styleable>
+
 </resources>

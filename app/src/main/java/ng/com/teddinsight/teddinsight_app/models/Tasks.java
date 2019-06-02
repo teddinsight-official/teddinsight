@@ -21,7 +21,7 @@ public class Tasks implements Parcelable {
     public int status;
     public boolean isDesigner;
     public boolean reminderSet;
-    private int pendingIntentId;
+    public int pendingIntentId;
     public static final int TASK_COMPLETE = 1;
     public static final int TASK_INCOMPLETE = 0;
 

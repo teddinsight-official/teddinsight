@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.PostScheduleActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.Toolbar
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/montserrat_bold"
+                        android:paddingTop="14dp"
+                        android:text="@string/schedule_post"
+                        android:textColor="@color/white"
+                        android:textSize="14sp" />
+
+                    <ImageButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="seeAndDownload"
+                        app:srcCompat="@drawable/ic_file_download" />
+                </LinearLayout>
+
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/compose_input_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/appbar">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/compose_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:background="@drawable/rect_white1"
+                android:fontFamily="@font/montserrat"
+                android:gravity="top|start"
+                android:hint="@string/compose_tweet"
+                android:inputType="textMultiLine"
+                android:lines="8"
+                android:padding="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="#Hello Twitter" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageView
+            android:id="@+id/media1"
+            android:layout_width="0dp"
+            android:layout_height="150dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/rect_white1"
+            app:layout_constraintEnd_toStartOf="@id/media2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/compose_input_layout"
+            app:srcCompat="@drawable/ic_add_black" />
+
+        <ImageView
+            android:id="@+id/media2"
+            android:layout_width="0dp"
+            android:layout_height="150dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/rect_white1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/media1"
+            app:layout_constraintTop_toTopOf="@id/media1"
+            app:srcCompat="@drawable/ic_add_black" />
+
+        <ImageView
+            android:id="@+id/media3"
+            android:layout_width="0dp"
+            android:layout_height="150dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/rect_white1"
+            app:layout_constraintEnd_toStartOf="@id/media4"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/media1"
+            app:srcCompat="@drawable/ic_add_black" />
+
+        <ImageView
+            android:id="@+id/media4"
+            android:layout_width="0dp"
+            android:layout_height="150dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/rect_white1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/media3"
+            app:layout_constraintTop_toTopOf="@id/media3"
+            app:srcCompat="@drawable/ic_add_black" />
+
+        <RadioGroup
+            android:id="@+id/radio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:checkedButton="@id/post_now"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/media4">
+
+            <RadioButton
+                android:id="@+id/post_now"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
+                android:text="@string/post_now" />
+
+            <RadioButton
+                android:id="@+id/post_later"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
+                android:text="@string/post_later" />
+
+        </RadioGroup>
+
+        <EditText
+            android:id="@+id/time_picker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:focusable="false"
+            android:fontFamily="@font/montserrat"
+            android:hint="@string/tap_to_select_post_date_and_time"
+            android:inputType="text"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="@id/radio"
+            app:layout_constraintTop_toBottomOf="@id/radio" />
+
+        <Button
+            android:id="@+id/schedule_post_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:gravity="center_horizontal"
+            android:text="@string/schedule_post"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/time_picker" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

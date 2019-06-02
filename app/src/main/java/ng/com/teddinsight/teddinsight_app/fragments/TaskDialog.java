@@ -63,6 +63,7 @@ public class TaskDialog extends DialogFragment {
     public static final String REMINDER_INTENT_TASK_ID = "task_id";
     private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     private DatabaseReference taskRef = FirebaseDatabase.getInstance().getReference().child(Tasks.getTableName()).child(user.getUid());
+    private Context mContext;
 
     public static TaskDialog NewInstance(Tasks tasks) {
         Bundle b = new Bundle();
@@ -90,7 +91,7 @@ public class TaskDialog extends DialogFragment {
         toolbar.setNavigationIcon(R.drawable.ic_close_white_24dp);
         toolbar.setNavigationOnClickListener(v -> getDialog().dismiss());
         toolbar.setTitle(tasks.getTaskTitle());
-        toolbar.setTitleTextAppearance(getContext(), R.style.ToolbarTheme);
+        toolbar.setTitleTextAppearance(mContext, R.style.ToolbarTheme);
         initialize();
         return view;
     }
@@ -99,10 +100,10 @@ public class TaskDialog extends DialogFragment {
         Log.e(TAG, "" + tasks.getPendingIntentId());
         if (tasks.reminderSet || tasks.status == TASK_COMPLETE)
             return;
-        AlarmManager manager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(getContext(), ReminderReceiver.class);
+        AlarmManager manager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(mContext, ReminderReceiver.class);
         intent.putExtra(REMINDER_INTENT_TASK_ID, tasks.id);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), tasks.getPendingIntentId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, tasks.getPendingIntentId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + TimeUnit.MINUTES.toMillis(5), AlarmManager.INTERVAL_HALF_DAY, pendingIntent);
         taskRef.child(tasks.id).child("reminderSet").setValue(true);
@@ -129,7 +130,7 @@ public class TaskDialog extends DialogFragment {
 
     @OnClick(R.id.mark_done)
     public void markAsDone() {
-        ProgressDialog progressDialog = new ProgressDialog(getContext(), R.style.AppCompatAlertDialogStyle);
+        ProgressDialog progressDialog = new ProgressDialog(mContext, R.style.AppCompatAlertDialogStyle);
         progressDialog.setMessage("Please Wait...");
         progressDialog.show();
         String user = tasks.isDesigner ? "designer" : "content";
@@ -140,7 +141,7 @@ public class TaskDialog extends DialogFragment {
                 statusView.setText(ExtraUtils.getStatText(0));
                 stat.setBackgroundColor(ExtraUtils.getColor(0));
             } else {
-                Toast.makeText(getContext(), "An Error Occurred, Try Again", Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext, "An Error Occurred, Try Again", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -165,4 +166,9 @@ public class TaskDialog extends DialogFragment {
                 .getAttributes().windowAnimations = R.style.DialogAnimation;
     }
 
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
 }

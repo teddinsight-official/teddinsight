@@ -17,11 +17,13 @@ import java.util.Random;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+
 import ng.com.teddinsight.teddinsight_app.R;
 import ng.com.teddinsight.teddinsight_app.utils.ExtraUtils;
 
-import static ng.com.teddinsight.teddinsight_app.activities.DesignerHomeActivity.CLIENT_PATH;
-import static ng.com.teddinsight.teddinsight_app.activities.DesignerHomeActivity.NOTIFICATION_CHANNEL_ID;
+import static ng.com.teddinsight.teddinsight_app.activities.DCSHomeActivity.CLIENT_PATH;
+import static ng.com.teddinsight.teddinsight_app.activities.DCSHomeActivity.NOTIFICATION_CHANNEL_ID;
+
 
 public class FileDownloadService extends IntentService {
 
@@ -38,7 +40,14 @@ public class FileDownloadService extends IntentService {
 
         String fileName = intent.getStringExtra("fileName");
         String url = intent.getStringExtra("url");
-        String dirPath = Environment.getExternalStorageDirectory() + CLIENT_PATH;
+        StringBuilder dirBuilder = new StringBuilder();
+        dirBuilder.append(Environment.getExternalStorageDirectory());
+        if (!intent.hasExtra("dir"))
+            dirBuilder.append(CLIENT_PATH);
+        else
+            dirBuilder.append("/Teddinsight/Designs");
+        String dirPath = dirBuilder.toString();
+
         int id = new Random().nextInt(100);
         NotificationManagerCompat mNotifyManager = NotificationManagerCompat.from(this);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);

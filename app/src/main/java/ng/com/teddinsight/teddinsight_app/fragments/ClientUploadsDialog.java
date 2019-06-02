@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,13 +31,14 @@ import ng.com.teddinsight.teddinsight_app.R;
 import ng.com.teddinsight.teddinsight_app.models.ClientUpload;
 
 public class ClientUploadsDialog extends DialogFragment {
-    @BindView(R.id.client_list_recyclerView)
+    @BindView(R.id.list_recyclerView)
     RecyclerView clientListRecyclerView;
     @BindView(R.id.empty_view)
     TextView emptyView;
     InitializeFileDownload initializeFileDownload;
     ClientUploadAdapter clientUploadAdapter;
     String businessName;
+    private Context mContext;
 
 
     public static ClientUploadsDialog NewInstance(String businessName) {
@@ -68,8 +68,8 @@ public class ClientUploadsDialog extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         clientUploadAdapter = new ClientUploadAdapter();
         clientListRecyclerView.setAdapter(clientUploadAdapter);
-        clientListRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        clientListRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        clientListRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        clientListRecyclerView.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
         businessName = getArguments().getString("businessName", "");
         getUploads();
     }
@@ -92,7 +92,7 @@ public class ClientUploadsDialog extends DialogFragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(getContext(), "An error occurred while loading client list", Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext, "An error occurred while loading client list", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -112,6 +112,7 @@ public class ClientUploadsDialog extends DialogFragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         initializeFileDownload = (InitializeFileDownload) context;
+        mContext = context;
     }
 
     @Override

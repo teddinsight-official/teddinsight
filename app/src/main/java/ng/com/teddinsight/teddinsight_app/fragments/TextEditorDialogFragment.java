@@ -38,6 +38,7 @@ public class TextEditorDialogFragment extends DialogFragment {
     private int mColorCode;
     private TextEditor mTextEditor;
     private Typeface mTypeface;
+    private Context mContext;
 
     public interface TextEditor {
         void onDone(String inputText, int colorCode, Typeface typeface);
@@ -97,7 +98,7 @@ public class TextEditorDialogFragment extends DialogFragment {
         addTextColorPickerRecyclerView.setHasFixedSize(true);
         addTextFontPickerRecyclerView.setLayoutManager(fontLayoutManager);
         addTextFontPickerRecyclerView.setHasFixedSize(true);
-        FontPickerAdapter fontPickerAdapter = new FontPickerAdapter(getContext());
+        FontPickerAdapter fontPickerAdapter = new FontPickerAdapter(mContext);
         fontPickerAdapter.setOnFontPickerClickListener(typeface -> {
             mTypeface = typeface;
             mAddTextEditText.setTypeface(typeface);
@@ -128,6 +129,11 @@ public class TextEditorDialogFragment extends DialogFragment {
 
     }
 
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
 
     //Callback to listener if user is done with text editing
     public void setOnTextEditorListener(TextEditor textEditor) {
