@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="ButtonBarContainerTheme">
+        <attr name="metaButtonBarStyle" format="reference" />
+        <attr name="metaButtonBarButtonStyle" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="TextViewDrawableSize">
+        <attr name="compoundDrawableWidth" format="dimension" />
+        <attr name="compoundDrawableHeight" format="dimension" />
+    </declare-styleable>
+
+</resources>

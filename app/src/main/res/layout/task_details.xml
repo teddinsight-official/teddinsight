@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorWhite">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            style="@style/ToolbarTheme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="56dp">
+
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:drawableStart="@drawable/ic_description"
+            android:fontFamily="@font/montserrat"
+            android:text="@string/description"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/desc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/montserrat"
+            android:textColor="@color/colorBlack"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/description"
+            app:layout_constraintTop_toTopOf="@+id/description"
+            tools:text="TextView" />
+
+        <TextView
+            android:id="@+id/assignedOn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:drawableStart="@drawable/ic_calendar_with_a_clock_time_tools"
+            android:paddingStart="5dp"
+            android:text="@string/assigned_on"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/desc"
+            tools:ignore="RtlSymmetry" />
+
+        <TextView
+            android:id="@+id/assigned_on"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/montserrat"
+            android:textColor="@color/colorBlack"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/assignedOn"
+            app:layout_constraintTop_toTopOf="@+id/assignedOn"
+            tools:text="TextView" />
+
+        <TextView
+            android:id="@+id/assignedBy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:drawableStart="@drawable/ic_assignment"
+            android:fontFamily="@font/montserrat"
+            android:paddingStart="4dp"
+            android:text="@string/assigned_by"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/assigned_on"
+            tools:ignore="RtlSymmetry" />
+
+        <TextView
+            android:id="@+id/assigned_by"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/montserrat"
+            android:textColor="@color/colorBlack"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.491"
+            app:layout_constraintStart_toEndOf="@+id/assignedBy"
+            app:layout_constraintTop_toTopOf="@+id/assignedBy"
+            tools:text="TextView" />
+
+        <TextView
+            android:id="@+id/dueDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:drawableStart="@drawable/ic_calendar_with_a_clock_time_tools"
+            android:fontFamily="@font/montserrat"
+            android:paddingStart="4dp"
+            android:text="@string/due_date"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/assigned_by"
+            tools:ignore="RtlSymmetry" />
+
+        <TextView
+            android:id="@+id/due_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/montserrat"
+            android:textColor="@color/colorBlack"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/dueDate"
+            app:layout_constraintTop_toTopOf="@+id/dueDate"
+            tools:text="TextView" />
+
+        <TextView
+            android:id="@+id/daysLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:drawableStart="@drawable/ic_hourglass_countdown"
+            android:fontFamily="@font/montserrat"
+            android:paddingStart="4dp"
+            android:text="@string/days_left"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/due_date"
+            tools:ignore="RtlSymmetry" />
+
+        <TextView
+            android:id="@+id/days_left"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/montserrat"
+            android:textColor="@color/colorBlack"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/daysLeft"
+            app:layout_constraintTop_toTopOf="@+id/daysLeft"
+            tools:text="TextView" />
+
+        <TextView
+            android:id="@+id/textView11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:drawableStart="@drawable/ic_battery"
+            android:paddingStart="4dp"
+            android:text="@string/status"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/days_left"
+            tools:ignore="RtlSymmetry" />
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/montserrat"
+            android:textColor="@color/colorBlack"
+            app:layout_constraintStart_toEndOf="@+id/textView11"
+            app:layout_constraintTop_toTopOf="@+id/textView11"
+            tools:text="TextView" />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/status">
+
+            <Button
+                android:id="@+id/mark_done"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/corners"
+                android:drawableStart="@drawable/ic_check_24dp"
+                android:fontFamily="@font/montserrat"
+                android:padding="8dp"
+                android:text="Mark As Done"
+                android:textAllCaps="false"
+                android:textColor="@color/colorWhite" />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/stat"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/circle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/status" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

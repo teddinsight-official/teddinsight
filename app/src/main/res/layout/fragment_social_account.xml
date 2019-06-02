@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/snackbar_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/account_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_instagram" />
+
+    <TextView
+        android:id="@+id/account_username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/montserrat"
+        app:layout_constraintStart_toEndOf="@id/account_type"
+        app:layout_constraintTop_toTopOf="@id/account_type"
+        tools:text="oluwatayo_" />
+
+    <TableLayout
+        android:id="@+id/account_details_table"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:stretchColumns="1"
+        app:layout_constraintTop_toBottomOf="@id/account_username">
+
+        <TableRow android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/table_row_borders"
+                android:fontFamily="@font/maven_pro_bold"
+                android:gravity="center_horizontal"
+                android:padding="3dip"
+                android:text="@string/followers"
+                android:textColor="@color/colorPrimaryDark" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/table_row_borders"
+                android:fontFamily="@font/maven_pro_bold"
+                android:gravity="center_horizontal"
+                android:padding="3dip"
+                android:text="@string/following"
+                android:textColor="@color/colorPrimaryDark" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/current_followers"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/montserrat"
+                android:gravity="center_horizontal"
+                android:padding="3dip"
+                tools:text="200" />
+
+            <TextView
+                android:id="@+id/current_following"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/montserrat"
+                android:gravity="center_horizontal"
+                android:padding="3dip"
+                tools:text="1000" />
+        </TableRow>
+    </TableLayout>
+
+    <TextView
+        android:id="@+id/analytics_table_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/maven_pro_bold"
+        android:gravity="center_horizontal"
+        android:text="@string/account_analytics"
+        app:layout_constraintTop_toBottomOf="@id/account_details_table" />
+
+    <TableLayout
+        android:id="@+id/account_analytics_table"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1"
+        app:layout_constraintTop_toBottomOf="@id/analytics_table_header">
+
+        <TableRow>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/maven_pro_bold"
+                android:padding="3dip"
+                android:text="@string/date_registered_with_teddinsight"
+                android:textColor="@color/colorPrimaryDark" />
+
+            <TextView
+                android:id="@+id/date_registered"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/montserrat"
+                android:padding="3dip"
+                tools:text="Tue, 21 Jan 2019" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/maven_pro_bold"
+                android:padding="3dip"
+                android:text="@string/followers_as_at_registration"
+                android:textColor="@color/colorPrimaryDark" />
+
+            <TextView
+                android:id="@+id/followers_at_registration"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/montserrat"
+                android:padding="3dip"
+                tools:text="200" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/maven_pro_bold"
+                android:padding="3dip"
+                android:text="@string/followers_now"
+                android:textColor="@color/colorPrimaryDark" />
+
+            <TextView
+                android:id="@+id/followers_now"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/montserrat"
+                android:padding="3dip"
+                tools:text="300" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/maven_pro_bold"
+                android:padding="3dip"
+                android:text="@string/followers_gained"
+                android:textColor="@color/colorPrimaryDark" />
+
+            <TextView
+                android:id="@+id/followers_gained"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/montserrat"
+                android:padding="3dip"
+                tools:text="100" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/maven_pro_bold"
+                android:padding="3dip"
+                android:text="@string/account_growth_percentage"
+                android:textColor="@color/colorPrimaryDark" />
+
+            <TextView
+                android:id="@+id/growth_percentage"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/montserrat"
+                android:padding="3dip"
+                tools:text="10%" />
+        </TableRow>
+    </TableLayout>
+
+
+    <Button
+        android:id="@+id/schedule_post_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rect_whitefull2"
+        android:padding="8dp"
+        android:text="@string/schedule_post"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/link_to_client"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:layout_marginStart="4dp"
+        android:id="@+id/link_to_client"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rect_whitefull2"
+        android:padding="8dp"
+        android:text="@string/link_account_to_a_client"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/schedule_post_button"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

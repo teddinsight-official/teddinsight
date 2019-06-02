@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.appbar.AppBarLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".activities.DCSHomeActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/activity_main_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <ImageButton
+                android:id="@+id/back_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:onClick="goBack"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_chevron_left_black_24dp" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/user_avatar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="16dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_tedd_copy"
+                app:layout_constraintLeft_toRightOf="@id/back_button"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <TextView
+                android:id="@+id/user_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/montserrat"
+                android:text="@string/staffs"
+                android:textColor="@color/white"
+                app:layout_constraintLeft_toRightOf="@id/user_avatar"
+                app:layout_constraintTop_toTopOf="@id/user_avatar" />
+
+            <TextView
+                android:id="@+id/last_seen"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:fontFamily="@font/maven_pro_regular"
+                android:textColor="@color/brown_700"
+                app:layout_constraintLeft_toLeftOf="@id/user_name"
+                app:layout_constraintTop_toBottomOf="@id/user_name"
+                tools:text="Online" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.appcompat.widget.Toolbar>
+
+</com.google.android.material.appbar.AppBarLayout>
