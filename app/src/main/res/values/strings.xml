@@ -65,8 +65,9 @@
     <string name="social_accounts">Social Accounts</string>
     <string name="social_manager">Social Media Manager</string>
     <string name="select_account_type">Select Account type</string>
-    <string name="com.twitter.sdk.android.CONSUMER_KEY">EHogqWe6fDAhxkUGM4wEli6la</string>
-    <string name="com.twitter.sdk.android.CONSUMER_SECRET">FyMjvsyBlG6eoiQd9NAQuYb40IclWR2YW9XzhmfvqZjuEQ5HoC</string>
+    <!--Uncomment this lines to activate twitter sdk-->
+    <!--<string name="com.twitter.sdk.android.CONSUMER_KEY">EHogqWe6fDAhxkUGM4wEli6la</string>-->
+    <!--<string name="com.twitter.sdk.android.CONSUMER_SECRET">FyMjvsyBlG6eoiQd9NAQuYb40IclWR2YW9XzhmfvqZjuEQ5HoC</string>-->
     <string name="schedule_post">Schedule Post</string>
     <string name="followers">Followers</string>
     <string name="following">Following</string>
