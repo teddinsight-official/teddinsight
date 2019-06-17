@@ -18,28 +18,38 @@
         app:srcCompat="@drawable/ic_attach_file" />
 
     <TextView
-        android:textColor="@color/black"
         android:id="@+id/filename"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:fontFamily="@font/montserrat"
+        android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@id/attach"
         app:layout_constraintLeft_toRightOf="@id/attach"
-        app:layout_constraintRight_toLeftOf="@id/download"
+        app:layout_constraintRight_toLeftOf="@id/date"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="file name" />
 
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/maven_pro_medium"
+        app:layout_constraintEnd_toStartOf="@id/download"
+        app:layout_constraintTop_toTopOf="@id/attach"
+        tools:text="jksjsdsdsjkj djks djkds dsjjkds sdjkkds sdkjjks" />
 
     <ImageButton
-        android:padding="8dp"
         android:id="@+id/download"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@id/attach"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:background="@color/white"
+        android:padding="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/date"
         app:srcCompat="@drawable/ic_file_download" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

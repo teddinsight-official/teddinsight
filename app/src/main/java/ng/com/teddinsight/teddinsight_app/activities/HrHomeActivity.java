@@ -64,7 +64,7 @@ public class HrHomeActivity extends BaseActivity implements Listeners.HrMainCont
     @Override
     public void onHrMainContentReplacementRequest(Fragment fragment, boolean shouldAddBackStack) {
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.container, fragment);
+        fragmentTransaction.replace(R.id.frame_container, fragment);
         if (shouldAddBackStack)
             fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();

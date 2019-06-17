@@ -65,6 +65,20 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserLi
         this.listener = userItemListener;
     }
 
+    public void restoreItem(User user, int position) {
+        userList.add(position, user);
+        notifyItemInserted(position);
+    }
+
+    public void removeItem(int position) {
+        userList.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    public List<User> getData() {
+        return userList;
+    }
+
     @Override
     public int getItemCount() {
         return userList.size();

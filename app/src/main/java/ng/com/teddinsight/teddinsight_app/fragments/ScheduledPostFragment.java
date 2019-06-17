@@ -118,8 +118,10 @@ public class ScheduledPostFragment extends Fragment {
             }
             dialog.dismiss();
         };
-        builder.setTitle("Take action for scheduled post")
-                .setMessage("Post content: " + scheduledPost.getPostText() + "\n\n This post " + (scheduledPost.isHasBeenReviewedByAdmin() ? "was " + scheduledPost.getStatus() : "has not been reviewed by an Admin"))
+        String message = "Post Description: " + scheduledPost.getPostTitle();
+        message += "\n\nPost content: " + scheduledPost.getPostText() + "\n\n This post " + (scheduledPost.isHasBeenReviewedByAdmin() ? "was " + scheduledPost.getStatus() : "has not been reviewed by an Admin");
+        builder.setTitle("Your scheduled post")
+                .setMessage(message)
                 .setPositiveButton("Ok", onClickListener)
                 .setNegativeButton("Delete", onClickListener)
                 .setNeutralButton("Close Dialog", onClickListener)
@@ -152,8 +154,10 @@ public class ScheduledPostFragment extends Fragment {
             }
             dialog.dismiss();
         };
+        String message = "Post Description: " + scheduledPost.getPostTitle();
+        message += "\n\nPost content: " + scheduledPost.getPostText() + "\n\nScheduled for: " + ExtraUtils.getHumanReadableString(scheduledPost.getPostTimestamp());
         builder.setTitle("Take action for scheduled post")
-                .setMessage("Post content: " + scheduledPost.getPostText() + "\n\nScheduled for: " + ExtraUtils.getHumanReadableString(scheduledPost.getPostTimestamp()))
+                .setMessage(message)
                 .setPositiveButton("Approve", onClickListener)
                 .setNegativeButton("Disapprove", onClickListener)
                 .setNeutralButton("Cancel", onClickListener)

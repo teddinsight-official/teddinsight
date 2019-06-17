@@ -25,8 +25,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -45,15 +43,16 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import ng.com.teddinsight.teddinsight_app.R;
+import ng.com.teddinsight.teddinsight_app.adapter.ServicesRecyclerViewAdapter;
+import ng.com.teddinsight.teddinsight_app.listeners.Listeners;
 import ng.com.teddinsight.teddinsight_app.models.Job;
 import ng.com.teddinsight.teddinsight_app.models.Notifications;
 import ng.com.teddinsight.teddinsight_app.models.Receipts;
-import ng.com.teddinsight.teddinsight_app.models.Tasks;
 import ng.com.teddinsight.teddinsight_app.utils.ExtraUtils;
 import ng.com.teddinsight.teddinsight_app.widgets.TextViewDrawableSize;
 import ng.com.teddinsight.teddinsightchat.models.User;
 
-public class ClientDetailsFragment extends Fragment {
+public class PartnerDetailsFragment extends Fragment {
     private User user;
     @BindView(R.id.business_logo)
     CircleImageView logoImageView;
@@ -83,18 +82,18 @@ public class ClientDetailsFragment extends Fragment {
     TextView progressText;
     private DatabaseReference rootRef;
     private DatabaseReference jobRef;
-    public static final String LOG_TAG = ClientDetailsFragment.class.getSimpleName();
-    ClientServiceClickListener clientServiceClickListener;
+    public static final String LOG_TAG = PartnerDetailsFragment.class.getSimpleName();
+    Listeners.ClientServiceClickListener clientServiceClickListener;
     int newProgress;
     private Context mContext;
 
 
-    public static ClientDetailsFragment NewInstance(User user) {
+    public static PartnerDetailsFragment NewInstance(User user) {
         Bundle bundle = new Bundle();
         bundle.putParcelable("user", user);
-        ClientDetailsFragment clientDetailsFragment = new ClientDetailsFragment();
-        clientDetailsFragment.setArguments(bundle);
-        return clientDetailsFragment;
+        PartnerDetailsFragment partnerDetailsFragment = new PartnerDetailsFragment();
+        partnerDetailsFragment.setArguments(bundle);
+        return partnerDetailsFragment;
     }
 
     @Nullable
@@ -117,7 +116,7 @@ public class ClientDetailsFragment extends Fragment {
             return;
         }
         setUpAndGetServices();
-        clientServiceClickListener = new ClientServiceClickListener() {
+        clientServiceClickListener = new Listeners.ClientServiceClickListener() {
             @Override
             public void onClientServiceClicked(Receipts service) {
                 showAlertDialog(service);
@@ -221,7 +220,7 @@ public class ClientDetailsFragment extends Fragment {
             databaseReference = FirebaseDatabase.getInstance().getReference().child(Receipts.getTableName()).child(user.getId());
         else
             databaseReference = FirebaseDatabase.getInstance().getReference().child(Job.getTableName()).child(user.getId());
-        servicesRecyclerViewAdapter = new ServicesRecyclerViewAdapter();
+        servicesRecyclerViewAdapter = new ServicesRecyclerViewAdapter(user, clientServiceClickListener);
         servicesRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         servicesRecyclerView.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
         servicesRecyclerView.setAdapter(servicesRecyclerViewAdapter);
@@ -353,71 +352,5 @@ public class ClientDetailsFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         mContext = context;
-    }
-
-    class ServicesRecyclerViewAdapter extends RecyclerView.Adapter<ServicesRecyclerViewAdapter.ServivesRecyclerViewHolder> {
-
-        List<Receipts> servicesList;
-        List<Job> jobList;
-
-        public ServicesRecyclerViewAdapter() {
-            this.servicesList = new ArrayList<>();
-            this.jobList = new ArrayList<>();
-        }
-
-        @NonNull
-        @Override
-        public ServivesRecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new ServivesRecyclerViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.client_list, parent, false));
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ServivesRecyclerViewHolder holder, int position) {
-            if (user.role.equalsIgnoreCase(User.USER_CLIENT)) {
-                Receipts service = servicesList.get(getItemCount() - position - 1);
-                holder.serviceDescription.setText(service.service.concat(" Package requested on ").concat(ExtraUtils.getHumanReadableString(service.dateIssued)));
-            } else {
-                Job job = jobList.get(getItemCount() - position - 1);
-                holder.serviceDescription.setText(job.getJobType());
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return user.role.equalsIgnoreCase(User.USER_CLIENT) ? servicesList.size() : jobList.size();
-        }
-
-        public void swapData(List<Receipts> servicesList) {
-            this.servicesList = servicesList;
-            notifyDataSetChanged();
-        }
-
-        public void swapJobs(List<Job> jobs) {
-            this.jobList = jobs;
-            notifyDataSetChanged();
-        }
-
-        class ServivesRecyclerViewHolder extends RecyclerView.ViewHolder {
-
-            @BindView(R.id.client_businessName)
-            TextView serviceDescription;
-
-            public ServivesRecyclerViewHolder(@NonNull View itemView) {
-                super(itemView);
-                ButterKnife.bind(this, itemView);
-                itemView.setOnClickListener(v -> {
-                    if (user.role.equalsIgnoreCase(User.USER_CLIENT))
-                        clientServiceClickListener.onClientServiceClicked(servicesList.get(getItemCount() - getAdapterPosition() - 1));
-                    else
-                        clientServiceClickListener.onJobClicked(jobList.get(getItemCount() - getAdapterPosition() - 1));
-                });
-            }
-        }
-    }
-
-    interface ClientServiceClickListener {
-        void onClientServiceClicked(Receipts service);
-
-        void onJobClicked(Job job);
     }
 }

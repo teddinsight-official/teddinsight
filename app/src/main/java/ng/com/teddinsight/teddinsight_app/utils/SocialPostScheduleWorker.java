@@ -70,7 +70,7 @@ public class SocialPostScheduleWorker extends Worker {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (!dataSnapshot.exists()) {
-                        showNotification("Not approved", "scheduled post for was not approved by admin", null);
+                        showNotification("Not approved", "scheduled post was not approved by admin", null);
                         return;
                     }
                     ScheduledPost scheduledPost = dataSnapshot.getValue(ScheduledPost.class);

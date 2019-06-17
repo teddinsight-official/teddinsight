@@ -12,6 +12,8 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 
+import androidx.core.content.FileProvider;
+
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -128,8 +130,12 @@ public class ExtraUtils {
         share.setType(type);
         Log.e("TAG", mediaPath);
         File media = new File(mediaPath);
-        Uri uri = Uri.fromFile(media);
-        share.putExtra(Intent.EXTRA_STREAM, uri);
+        //Uri uri = Uri.fromFile(media);
+        Uri apkURI = FileProvider.getUriForFile(
+                activity,
+                activity.getApplicationContext()
+                        .getPackageName() + ".provider", media);
+        share.putExtra(Intent.EXTRA_STREAM, apkURI);
         activity.startActivity(Intent.createChooser(share, "Select Instagram"));
     }
 

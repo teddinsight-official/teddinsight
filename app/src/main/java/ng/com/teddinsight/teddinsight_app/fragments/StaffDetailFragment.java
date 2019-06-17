@@ -12,9 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +29,7 @@ import androidx.fragment.app.Fragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,7 +38,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Random;
 
 import butterknife.BindView;
@@ -247,6 +253,35 @@ public class StaffDetailFragment extends Fragment implements View.OnClickListene
         final EditText salary = promptView.findViewById(R.id.salary);
         if (salary != null)
             salary.setText(String.valueOf(user.getSalary()));
+        final Spinner spinner = (Spinner) promptView.findViewById(R.id.roles);
+
+        final TextInputEditText firstNameEditText = promptView.findViewById(R.id.firstName);
+        if (user.getFirstName() != null)
+            firstNameEditText.setText(user.getFirstName());
+        final TextInputEditText lastNameEdittext = promptView.findViewById(R.id.lastname);
+        if (user.getLastName() != null)
+            lastNameEdittext.setText(user.getLastName());
+        List<String> categories = new ArrayList<>();
+        categories.add(User.USER_ADMIN);
+        categories.add(User.USER_CONTENT);
+        categories.add(User.USER_DESIGNER);
+        categories.add(User.USER_HR);
+        categories.add(User.USER_SOCIAL);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_item, categories);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(dataAdapter);
+        spinner.setSelection(categories.indexOf(user.role), true);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                user.setRole(parent.getItemAtPosition(position).toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         Calendar calendar = Calendar.getInstance();
         dateEmployed.setOnClickListener((v) -> {
             DatePickerDialog.OnDateSetListener listener = (view, year, month, dayOfMonth) -> {
@@ -272,6 +307,8 @@ public class StaffDetailFragment extends Fragment implements View.OnClickListene
                         user.setSalary(s);
                         user.setPhoneNumber(phone);
                         user.setAddress(add);
+                        user.setFirstName(firstNameEditText.getText().toString().trim());
+                        user.setLastName(lastNameEdittext.getText().toString().trim());
                         setUpStaffInfo();
                         updateUser();
                     } catch (Exception e) {

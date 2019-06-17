@@ -74,6 +74,7 @@ import ng.com.teddinsight.teddinsightchat.fragments.ChatListFragment;
 
 import ng.com.teddinsight.teddinsightchat.fragments.ThreadFragment;
 import ng.com.teddinsight.teddinsightchat.models.User;
+import ng.com.teddinsight.teddinsightchat.utils.ExtraUtils;
 
 
 import static ng.com.teddinsight.teddinsight_app.utils.ExtraUtils.createInstagramIntent;
@@ -168,6 +169,7 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
             finish();
             return;
         }
+        ExtraUtils.registerRevokeListener(this, LoginActivity.class);
         Intent i = getIntent();
         role = "";
         if (i != null) {
@@ -179,6 +181,7 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
                     createInstagramIntent(this, mediaPath);
                 NotificationManagerCompat mNotifyManager = NotificationManagerCompat.from(getApplicationContext());
                 mNotifyManager.cancelAll();
+                i.removeExtra(SocialPostScheduleWorker.SCHEDULE_ID);
                 finish();
             }
         }

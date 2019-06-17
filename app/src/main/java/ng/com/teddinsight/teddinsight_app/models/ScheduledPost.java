@@ -9,6 +9,7 @@ public class ScheduledPost {
     private String accountId;
     private String accountUsername;
     private String postText;
+    private String postTitle;
     private String postImage;
     private boolean hasBeenReviewedByAdmin;
     private boolean wasSuccesful;
@@ -154,5 +155,13 @@ public class ScheduledPost {
 
     public String getInstagramId() {
         return instagramId;
+    }
+
+    public String getPostTitle() {
+        return postTitle;
+    }
+
+    public void setPostTitle(String postTitle) {
+        this.postTitle = postTitle;
     }
 }

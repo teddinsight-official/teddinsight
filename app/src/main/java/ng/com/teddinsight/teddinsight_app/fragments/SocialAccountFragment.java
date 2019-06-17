@@ -167,6 +167,7 @@ public class SocialAccountFragment extends Fragment {
 
             @Override
             public void failure(TwitterException exception) {
+                progressDialog.dismiss();
                 snackbar = Snackbar.make(snackbarView, exception.getMessage().concat(" If you are sure it's not a network error, try adding account again"),
                         Snackbar.LENGTH_INDEFINITE)
                         .setActionTextColor(ContextCompat.getColor(getActivityCast(), R.color.yellow_900))

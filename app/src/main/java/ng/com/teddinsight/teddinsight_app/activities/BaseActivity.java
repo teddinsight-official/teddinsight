@@ -82,7 +82,6 @@ public class BaseActivity extends AppCompatActivity implements Listeners.StaffIt
     }
 
     void replaceFragmentContainerContent(Fragment fragment, boolean shouldAddBackstack) {
-        Toast.makeText(this, "called", Toast.LENGTH_LONG).show();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.setCustomAnimations(R.anim.enter, R.anim.leave, R.anim.pop_enter, R.anim.pop_leave);

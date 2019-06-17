@@ -66,8 +66,8 @@
     <string name="social_manager">Social Media Manager</string>
     <string name="select_account_type">Select Account type</string>
     <!--Uncomment this lines to activate twitter sdk-->
-    <!--<string name="com.twitter.sdk.android.CONSUMER_KEY">EHogqWe6fDAhxkUGM4wEli6la</string>-->
-    <!--<string name="com.twitter.sdk.android.CONSUMER_SECRET">FyMjvsyBlG6eoiQd9NAQuYb40IclWR2YW9XzhmfvqZjuEQ5HoC</string>-->
+    <string name="com.twitter.sdk.android.CONSUMER_KEY">EHogqWe6fDAhxkUGM4wEli6la</string>
+    <string name="com.twitter.sdk.android.CONSUMER_SECRET">FyMjvsyBlG6eoiQd9NAQuYb40IclWR2YW9XzhmfvqZjuEQ5HoC</string>
     <string name="schedule_post">Schedule Post</string>
     <string name="followers">Followers</string>
     <string name="following">Following</string>
@@ -96,5 +96,10 @@
     <string name="no_logs">No Logs Yet</string>
     <string name="link_account_to_a_client">Link account to a client</string>
     <string name="no_uploaded_designs">No uploaded designs</string>
+    <string name="firstName">Firstname</string>
+    <string name="lastname">Lastname</string>
+    <string name="role">Role</string>
+    <string name="post_title_description">Post title/description</string>
+    <string name="no_uploads_for_client">You haven\'t uploaded any files for</string>
 
 </resources>

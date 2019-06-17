@@ -2,9 +2,13 @@ package ng.com.teddinsight.teddinsight_app.fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -47,6 +51,8 @@ import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -63,6 +69,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import id.zelory.compressor.Compressor;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import ng.com.teddinsight.teddinsight_app.R;
 import ng.com.teddinsight.teddinsight_app.listeners.Listeners;
 import ng.com.teddinsight.teddinsight_app.models.DesignerDesigns;
@@ -74,7 +84,9 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 
 import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
 import static androidx.constraintlayout.widget.Constraints.TAG;
+import static ng.com.teddinsight.teddinsight_app.activities.DCSHomeActivity.LOG_TAG;
 
 
 public class DesignerHomeFragment extends Fragment implements EasyPermissions.PermissionCallbacks, DesignTemplateClicked {
@@ -115,6 +127,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
     String path = "/TeddinsightDnC/Images";
     Listeners.ShowEditImageActivity showEditImageActivity;
     private Context mContext;
+    private ProgressDialog progressDialog;
 
 
     @Nullable
@@ -144,6 +157,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
             homeTitle.setText(User.USER_DESIGNER);
             designTitle.setText(getString(R.string.upload_designs));
         }
+        progressDialog = new ProgressDialog(mContext);
         designRef = FirebaseDatabase.getInstance().getReference(DesignerDesigns.DESIGNS);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
         designGrid.setLayoutManager(linearLayoutManager);
@@ -216,10 +230,11 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
 
 
     public void choosePhotoFromGallary() {
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
-        startActivityForResult(galleryIntent, GALLERY);
+//        Intent galleryIntent = new Intent(Intent.ACTION_PICK,
+//                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//
+//        startActivityForResult(galleryIntent, GALLERY);
+        CropImage.startPickImageActivity(mContext, this);
     }
 
     private void takePhotoFromCamera() {
@@ -232,6 +247,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
             StorageReference imageRef = FirebaseStorage.getInstance().getReference().child("designer/designs" + templateTitle);
             UploadTask uploadTask = imageRef.putFile(contentURI);
             AlertDialog.Builder progressDialog = new AlertDialog.Builder(context);
+
             View v = LayoutInflater.from(context).inflate(R.layout.upload_dialog_layout, null, false);
             final ProgressBar progressBar = v.findViewById(R.id.progressBar);
             final TextView tv = v.findViewById(R.id.upload_title);
@@ -239,9 +255,8 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
             final TextView finalize = v.findViewById(R.id.finalize_textview);
             uploadPercentTextView.setText("0 %");
             tv.setText(context.getString(R.string.initial_upload));
-            progressDialog.setView(v);
-
-            AlertDialog dialog = progressDialog.show();
+            progressDialog.setView(v)
+                    .setCancelable(false);
             uploadTask.addOnProgressListener(taskSnapshot -> {
                 long progress = (long) (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
                 int p = ExtraUtils.safeLongToInt(progress);
@@ -250,7 +265,7 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
                 uploadPercentTextView.setText(p + " %");
                 progressBar.setProgress(p);
             });
-
+            AlertDialog dialog = progressDialog.create();
             Task<Uri> urlTask = uploadTask.continueWithTask(task -> {
                 if (!task.isSuccessful()) {
                     throw task.getException();
@@ -272,6 +287,13 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
                     Toast.makeText(context, "An Error Occurred while uploading Image, Try Again!", Toast.LENGTH_LONG).show();
                 }
             });
+
+            DialogInterface.OnClickListener progressDialogClickListener = (dialog1, which) -> {
+                //uploadTask.cancel();
+                dialog1.cancel();
+            };
+            dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Hide", progressDialogClickListener);
+            dialog.show();
         }
     }
 
@@ -329,20 +351,45 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
         if (resultCode == RESULT_CANCELED) {
             return;
         }
-        if (requestCode == GALLERY) {
+        if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE) {
             if (data != null) {
                 contentURI = data.getData();
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(mContext.getContentResolver(), contentURI);
-                    uploadFile(contentURI, mContext, templateTitle, false, null, null);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(mContext, "Failed!", Toast.LENGTH_SHORT).show();
-                }
+                Activity activity = getActivity();
+                if (activity != null)
+                    CropImage.activity(contentURI).setGuidelines(CropImageView.Guidelines.ON).start(mContext, this);
             }
 
+        } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            Toast.makeText(mContext, "dsf", Toast.LENGTH_SHORT).show();
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                contentURI = result.getUri();
+                startCompression(contentURI);
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+                Toast.makeText(mContext, error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            }
         }
+    }
+
+    private void startCompression(Uri uri) {
+        progressDialog.setMessage("Compressing Image, Please wait");
+        progressDialog.show();
+        File imageFile = new File(uri.getPath());
+        Disposable sc = new Compressor(mContext)
+                .compressToFileAsFlowable(imageFile)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(file -> {
+                    progressDialog.dismiss();
+                    contentURI = Uri.fromFile(file);
+                    uploadFile(contentURI, mContext, templateTitle, false, null, null);
+                }, throwable -> {
+                    progressDialog.dismiss();
+                    throwable.printStackTrace();
+                    Log.e(LOG_TAG, throwable.getLocalizedMessage());
+                    Toast.makeText(mContext, throwable.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     @Override

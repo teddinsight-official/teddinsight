@@ -11,6 +11,7 @@ import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -24,10 +25,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.Toast;
-
-import com.esafirm.imagepicker.features.ImagePicker;
-import com.esafirm.imagepicker.features.ReturnMode;
-import com.esafirm.imagepicker.model.Image;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.database.DatabaseReference;
@@ -111,6 +108,8 @@ public class PostScheduleActivity extends AppCompatActivity implements DatePicke
     private ProgressDialog progressDialog;
     private File compressedImage;
     private Map<String, String> mediaIds;
+    @BindView(R.id.post_title)
+    TextInputEditText postTitleEdittext;
     private DatabaseReference reference = FirebaseDatabase.getInstance().getReference(ScheduledPost.SCHEDULE_PATH);
 
     @Override
@@ -183,30 +182,16 @@ public class PostScheduleActivity extends AppCompatActivity implements DatePicke
     @Override
     public void onClick(View v) {
         selectedImageView = (ImageView) v;
-        ImagePicker.create(this)
-                .single()
-                .folderMode(true)
-                .returnMode(ReturnMode.CAMERA_ONLY)
-                .theme(R.style.AppTheme)
-                .start();
+        CropImage.startPickImageActivity(this);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
+        if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE) {
             Log.e(LOG_TAG, "res");
-            Image image = ImagePicker.getFirstImageOrNull(data);
-            File imgFile = new File(image.getPath());
-            if (imgFile.exists()) {
-                Uri imageUri = Uri.fromFile(imgFile);
-                if (socialAccounts.getAccountType().equalsIgnoreCase(SocialAccounts.ACCOUNT_TYPE_TWITTER)) {
-                    CropImage.activity(imageUri).setGuidelines(CropImageView.Guidelines.ON).start(this);
-                } else {
-                    compressedImage = imgFile;
-                    selectedImageView.setImageBitmap(BitmapFactory.decodeFile(compressedImage.getPath()));
-
-                }
-                Log.e(LOG_TAG, image.getPath());
+            if (data != null) {
+                Uri imageUri = data.getData();
+                CropImage.activity(imageUri).setGuidelines(CropImageView.Guidelines.ON).start(this);
             } else
                 Toast.makeText(getApplicationContext(), "image not found", Toast.LENGTH_SHORT).show();
         } else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
@@ -233,7 +218,12 @@ public class PostScheduleActivity extends AppCompatActivity implements DatePicke
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(file -> {
                     compressedImage = file;
-                    prepareMediaForUploadToTwitter(getMediaRequestBodyAsFlowable(compressedImage));
+                    if (socialAccounts.getAccountType().equalsIgnoreCase(SocialAccounts.ACCOUNT_TYPE_TWITTER))
+                        prepareMediaForUploadToTwitter(getMediaRequestBodyAsFlowable(compressedImage));
+                    else {
+                        selectedImageView.setImageURI(Uri.fromFile(compressedImage));
+                        progressDialog.dismiss();
+                    }
                 }, throwable -> {
                     progressDialog.dismiss();
                     throwable.printStackTrace();
@@ -322,9 +312,19 @@ public class PostScheduleActivity extends AppCompatActivity implements DatePicke
                     }
                 });
             } else {
-                ExtraUtils.createInstagramIntent(this, compressedImage.getPath());
+                if (compressedImage != null)
+                    ExtraUtils.createInstagramIntent(this, compressedImage.getPath());
+                else
+                    showToast("Please select an image", Toast.LENGTH_LONG);
             }
         } else {
+            String postTitle = postTitleEdittext.getText().toString().trim();
+            if (TextUtils.isEmpty(postTitle)) {
+                showToast("please enter a title/description for this post", Toast.LENGTH_SHORT);
+                postTitleEdittext.setError("Cannot be blank");
+                postTitleEdittext.requestFocus();
+                return;
+            }
             if (socialAccounts.getAccountType().equalsIgnoreCase(SocialAccounts.ACCOUNT_TYPE_TWITTER)) {
                 scheduledPost = new ScheduledPost(
                         socialAccounts.getAccountType(),
@@ -340,6 +340,10 @@ public class PostScheduleActivity extends AppCompatActivity implements DatePicke
                         socialAccounts.getTwitterUserName(),
                         socialAccounts.getTwitterSecreteToken());
             } else {
+                if (compressedImage == null) {
+                    showToast("Please select an image", Toast.LENGTH_LONG);
+                    return;
+                }
                 scheduledPost = new ScheduledPost(socialAccounts.getAccountType(),
                         socialAccounts.getAccountType().toLowerCase().concat(socialAccounts.getInstagramId()),
                         socialAccounts.getAccountUsername(),
@@ -350,6 +354,7 @@ public class PostScheduleActivity extends AppCompatActivity implements DatePicke
                         System.currentTimeMillis(),
                         socialAccounts.getInstagramId());
             }
+            scheduledPost.setPostTitle(postTitle);
             String key = reference.push().getKey();
             Data.Builder builder = new Data.Builder();
             String id = String.valueOf(socialAccounts.getAccountType().equals(SocialAccounts.ACCOUNT_TYPE_TWITTER) ? socialAccounts.getTwitterUserId() : socialAccounts.getInstagramId());

@@ -2,7 +2,9 @@ package ng.com.teddinsight.teddinsight_app.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -10,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,10 +20,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -41,6 +48,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import ng.com.teddinsight.teddinsight_app.R;
 import ng.com.teddinsight.teddinsight_app.adapter.UserListAdapter;
 import ng.com.teddinsight.teddinsight_app.listeners.Listeners;
+import ng.com.teddinsight.teddinsight_app.utils.SwipeToDeleteCallback;
 import ng.com.teddinsight.teddinsightchat.models.Notifications;
 import ng.com.teddinsight.teddinsightchat.models.User;
 
@@ -60,6 +68,8 @@ public class HrHomeFragment extends Fragment {
     RecyclerView userRecyclerView;
     @BindView(R.id.shimmer_view_container)
     ShimmerFrameLayout shimmerFrameLayout;
+    @BindView(R.id.hr_root_view)
+    View hrRootVIew;
 
     private Listeners.UserItemClickListener userItemClickListener;
     private SharedPreferences preferences;
@@ -100,6 +110,7 @@ public class HrHomeFragment extends Fragment {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         setUpUser();
         getAllStaffs();
+        enableSwipeToDeleteAndUndo();
     }
 
     @OnClick(R.id.addNewUser)
@@ -177,6 +188,45 @@ public class HrHomeFragment extends Fragment {
             }
         });
     }
+
+    private void enableSwipeToDeleteAndUndo() {
+        SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(mContext) {
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
+                final int position = viewHolder.getAdapterPosition();
+                final User user = userListAdapter.getData().get(position);
+                userListAdapter.removeItem(position);
+                Handler handler = new Handler();
+                Runnable runnable = () -> reference.child(User.getTableName()).child(user.getId()).removeValue().addOnCompleteListener(task -> {
+                    if (task.isSuccessful())
+                        showToast(user.getFirstName() + " deleted", Toast.LENGTH_SHORT);
+                    else
+                        userListAdapter.restoreItem(user, position);
+                });
+                handler.postDelayed(runnable, 3500);
+
+                Snackbar snackbar = Snackbar
+                        .make(hrRootVIew, "User Deleted", Snackbar.LENGTH_LONG);
+                snackbar.setAction("UNDO", view -> {
+                    userListAdapter.restoreItem(user, position);
+                    userRecyclerView.scrollToPosition(position);
+                    handler.removeCallbacks(runnable);
+                });
+
+                snackbar.setActionTextColor(Color.YELLOW);
+                snackbar.show();
+
+            }
+        };
+
+        ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeToDeleteCallback);
+        itemTouchhelper.attachToRecyclerView(userRecyclerView);
+    }
+
+    private void showToast(String message, int duration) {
+        Toast.makeText(mContext, message, duration).show();
+    }
+
 
     @Override
     public void onAttach(@NonNull Context context) {

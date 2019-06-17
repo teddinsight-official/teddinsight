@@ -3,6 +3,8 @@ package ng.com.teddinsight.teddinsight_app.listeners;
 import androidx.fragment.app.Fragment;
 
 import ng.com.teddinsight.teddinsight_app.models.DesignerDesigns;
+import ng.com.teddinsight.teddinsight_app.models.Job;
+import ng.com.teddinsight.teddinsight_app.models.Receipts;
 import ng.com.teddinsight.teddinsight_app.models.SocialAccounts;
 import ng.com.teddinsight.teddinsight_app.models.Tasks;
 import ng.com.teddinsight.teddinsight_app.models.Tickets;
@@ -38,5 +40,10 @@ public interface Listeners {
         void onSocialAccountItemClicked(SocialAccounts socialAccounts);
 
         void onTwitterButtonClicked();
+    }
+    interface ClientServiceClickListener {
+        void onClientServiceClicked(Receipts service);
+
+        void onJobClicked(Job job);
     }
 }

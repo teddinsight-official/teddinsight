@@ -31,7 +31,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import ng.com.teddinsight.teddinsight_app.R;
 import ng.com.teddinsight.teddinsight_app.fragments.AdminHomeFragment;
-import ng.com.teddinsight.teddinsight_app.fragments.ClientDetailsFragment;
+import ng.com.teddinsight.teddinsight_app.fragments.ClientsDetailFragment;
+import ng.com.teddinsight.teddinsight_app.fragments.PartnerDetailsFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.ClientListFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.CustomerSupportFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.DesignsFragment;
@@ -41,6 +42,7 @@ import ng.com.teddinsight.teddinsight_app.models.SocialAccounts;
 import ng.com.teddinsight.teddinsightchat.fragments.ChatListFragment;
 
 import ng.com.teddinsight.teddinsightchat.models.User;
+import ng.com.teddinsight.teddinsightchat.utils.ExtraUtils;
 
 public class AdminActivity extends BaseActivity implements ClientListFragment.ClientItemClickedListener {
     Drawer drawer;
@@ -177,7 +179,10 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
 
     @Override
     public void onClientItemClicked(User client, SocialAccounts socialAccounts) {
-        replaceFragmentContainerContent(ClientDetailsFragment.NewInstance(client), true);
+        if (client.role.equalsIgnoreCase(User.USER_PARTNER))
+            replaceFragmentContainerContent(PartnerDetailsFragment.NewInstance(client), true);
+        else
+            replaceFragmentContainerContent(ClientsDetailFragment.NewInstance(client), true);
     }
 
     public void goBack(View view) {

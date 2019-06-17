@@ -35,8 +35,8 @@ android {
         minSdkVersion 19
         targetSdkVersion 28
         multiDexEnabled true
-        versionCode 7
-        versionName "1.6"
+        versionCode 9
+        versionName "1.9"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -138,11 +138,6 @@ dependencies {
 
     //Material Picker Dialog
     implementation 'com.wdullaer:materialdatetimepicker:4.2.0'
-
-    //Image Picker library
-    implementation('com.github.esafirm.android-image-picker:imagepicker:1.13.1') {
-        exclude group: 'com.android.support'
-    }
 
     //android state
     implementation 'com.evernote:android-state:1.4.1'
