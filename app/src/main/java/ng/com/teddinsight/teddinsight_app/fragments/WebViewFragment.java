@@ -19,6 +19,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -40,6 +42,7 @@ import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import ng.com.teddinsight.teddinsight_app.R;
 
 
@@ -50,6 +53,8 @@ public class WebViewFragment extends DialogFragment {
     private static final String TAG = WebViewFragment.class.getSimpleName();
     @BindView(R.id.webview)
     WebView webView;
+    @BindView(R.id.site_title)
+    TextView siteTitle;
     private WebSettings webSettings;
     private ValueCallback<Uri> mUploadMessage;
     private Uri mCapturedImageURI = null;
@@ -81,6 +86,9 @@ public class WebViewFragment extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        CookieSyncManager.createInstance(mContext);
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.removeAllCookie();
         webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
@@ -99,9 +107,10 @@ public class WebViewFragment extends DialogFragment {
         url = getArguments().getString("URL", "");
         if (url == null || TextUtils.isEmpty(url)) {
             getDialog().cancel();
-        }
-        else
+        } else {
+            siteTitle.setText(url);
             webView.loadUrl(url);
+        }
 
     }
 
@@ -122,6 +131,11 @@ public class WebViewFragment extends DialogFragment {
         }
     }
 
+    @OnClick(R.id.homeButton)
+    public void closeWebViewDialog(){
+        getDialog().cancel();
+    }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -136,6 +150,8 @@ public class WebViewFragment extends DialogFragment {
             return true;
         }
     }
+
+
 
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
@@ -164,6 +180,7 @@ public class WebViewFragment extends DialogFragment {
     }
 
     public class ChromeClient extends WebChromeClient {
+
         // For Android 5.0
         public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> filePath, FileChooserParams fileChooserParams) {
             // Double check that we don't have any existing callbacks
@@ -285,6 +302,7 @@ public class WebViewFragment extends DialogFragment {
 
         // Called when all page resources loaded
         public void onPageFinished(WebView view, String url) {
+            siteTitle.setText(view.getTitle());
             try {
                 // Close progressDialog
                 if (progressDialog.isShowing()) {

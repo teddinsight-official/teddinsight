@@ -7,6 +7,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 
 import androidx.annotation.NonNull;
@@ -168,7 +170,7 @@ public class LoginActivity extends AppCompatActivity implements EasyPermissions.
             Toast.makeText(this, "Input your email", Toast.LENGTH_LONG).show();
             return;
         }
-        dialog.setMessage("Sending password reset mail to "+email);
+        dialog.setMessage("Sending password reset mail to " + email);
         dialog.show();
         mAuth.sendPasswordResetEmail(email).addOnCompleteListener(task -> {
             dialog.dismiss();
@@ -268,6 +270,21 @@ public class LoginActivity extends AppCompatActivity implements EasyPermissions.
     @Override
     protected void onStart() {
         super.onStart();
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            String version = pInfo.versionName;
+            Log.e("log", version);
+            if (!preferences.contains("hasSigned")) {
+                if (version.equalsIgnoreCase("2.0"))
+                    FirebaseAuth.getInstance().signOut();
+                user = FirebaseAuth.getInstance().getCurrentUser();
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean("hasSigned", true);
+                editor.apply();
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             if (preferences.contains("role")) {
                 String role = preferences.getString("role", "");
