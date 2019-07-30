@@ -39,6 +39,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,8 +47,10 @@ import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import ng.com.teddinsight.teddinsight_app.R;
+import ng.com.teddinsight.teddinsight_app.activities.DCSHomeActivity;
 import ng.com.teddinsight.teddinsight_app.adapter.UserListAdapter;
 import ng.com.teddinsight.teddinsight_app.listeners.Listeners;
+import ng.com.teddinsight.teddinsight_app.utils.ExtraUtils;
 import ng.com.teddinsight.teddinsight_app.utils.SwipeToDeleteCallback;
 import ng.com.teddinsight.teddinsightchat.models.Notifications;
 import ng.com.teddinsight.teddinsightchat.models.User;
@@ -77,6 +80,8 @@ public class HrHomeFragment extends Fragment {
     private AppCompatActivity activity;
     private FirebaseUser currentUser;
     DatabaseReference reference;
+    DatabaseReference notifRef;
+    ValueEventListener valueEventListener;
     private UserListAdapter userListAdapter;
     FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
     private Context mContext;
@@ -108,9 +113,6 @@ public class HrHomeFragment extends Fragment {
         userRecyclerView.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
         userRecyclerView.setAdapter(userListAdapter);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        setUpUser();
-        getAllStaffs();
-        enableSwipeToDeleteAndUndo();
     }
 
     @OnClick(R.id.addNewUser)
@@ -121,6 +123,14 @@ public class HrHomeFragment extends Fragment {
             fragmentTransaction.remove(prev);
         WebViewFragment.NewInstance("https://teddinsight.com.ng/admin.php").show(fragmentTransaction, "adduser");
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        setUpUser();
+        getAllStaffs();
+        enableSwipeToDeleteAndUndo();
     }
 
     private void setUpUser() {
@@ -140,7 +150,8 @@ public class HrHomeFragment extends Fragment {
 
             }
         });
-        reference.child(Notifications.getTableName()).child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+        notifRef = reference.child(Notifications.getTableName()).child(currentUser.getUid());
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Log.e(LOG_TAG, "new notification");
@@ -151,6 +162,9 @@ public class HrHomeFragment extends Fragment {
                         String countText = count > 99 ? "9+" : String.valueOf(count);
                         notifTextView.setText(countText);
                         notifTextView.setVisibility(View.VISIBLE);
+                        Toast.makeText(mContext, "You have unread messages", Toast.LENGTH_LONG).show();
+                        if (getActivity() != null)
+                            ExtraUtils.playSound(getActivity().getApplication());
                     } else {
                         notifTextView.setVisibility(View.INVISIBLE);
                     }
@@ -161,7 +175,15 @@ public class HrHomeFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
+        notifRef.addValueEventListener(valueEventListener);
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        notifRef.removeEventListener(valueEventListener);
     }
 
     private void getAllStaffs() {

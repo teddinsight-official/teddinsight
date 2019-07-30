@@ -80,6 +80,8 @@ public class LogsFragment extends Fragment {
         enableSwipeToDeleteAndUndo();
     }
 
+
+
     private void enableSwipeToDeleteAndUndo() {
         SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(mContext) {
             @Override

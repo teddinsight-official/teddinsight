@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+        <variable
+            name="contentNotes"
+            type="ng.com.teddinsight.teddinsight_app.models.ContentNotes" />
+    </data>
+
+    <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:cardCornerRadius="8dp"
+        android:layout_margin="4dp"
+        android:id="@+id/itemview"
+        app:cardElevation="1dp">
+
+
+        <View
+            app:notesBorder="@{contentNotes}"
+            android:id="@+id/note_border"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:background="@drawable/green_border" />
+
+        <ImageView
+            app:statusImage="@{contentNotes}"
+            android:id="@+id/note_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            app:srcCompat="@drawable/ic_check_circle_green_24dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/note_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
+                android:text="@{contentNotes.getTitle()}"
+                android:gravity="center_horizontal"
+                android:textStyle="bold"
+                tools:text="A sample note" />
+
+            <TextView
+                android:text="@{contentNotes.getNote()}"
+                android:id="@+id/note_content"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/montserrat"
+                tools:text="This is a new note sample" />
+
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+</layout>

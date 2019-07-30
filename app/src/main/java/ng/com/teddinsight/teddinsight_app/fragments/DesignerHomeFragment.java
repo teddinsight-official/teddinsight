@@ -38,6 +38,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
@@ -490,21 +495,40 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
         }
 
         private void loadImage(DesignerDesigns designerDesigns, DesignViewHolder holder) {
-            Picasso.get().load(designerDesigns.getImageUrl())
-                    .into(holder.templateImageView, new Callback() {
+            Glide.with(holder.templateImageView.getContext())
+                    .load(designerDesigns.getImageUrl())
+                    .apply(new RequestOptions().placeholder(R.drawable.loading_animation))
+                    .listener(new RequestListener<Drawable>() {
                         @Override
-                        public void onSuccess() {
-                            holder.imageIndicator.setVisibility(View.GONE);
-                            designerDesigns.setCanEdit(true);
-                        }
-
-                        @Override
-                        public void onError(Exception e) {
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, com.bumptech.glide.request.target.Target<Drawable> target, boolean isFirstResource) {
                             holder.imageIndicator.setVisibility(View.VISIBLE);
                             holder.imageIndicator.setText(getString(R.string.tap_to_retry));
                             designerDesigns.setCanEdit(false);
+                            return false;
                         }
-                    });
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, com.bumptech.glide.request.target.Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            holder.imageIndicator.setVisibility(View.GONE);
+                            designerDesigns.setCanEdit(true);
+                            return false;
+                        }
+                    })
+                    .into(holder.templateImageView);
+
+
+//            Picasso.get().load(designerDesigns.getImageUrl())
+//                    .into(holder.templateImageView, new Callback() {
+//                        @Override
+//                        public void onSuccess() {
+//
+//                        }
+//
+//                        @Override
+//                        public void onError(Exception e) {
+//
+//                        }
+//                    });
         }
 
         private void downloadImage(String url, ImageView view, Button imageIndicator, String imgName, DesignerDesigns design) {

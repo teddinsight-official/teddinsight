@@ -25,6 +25,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
@@ -34,6 +40,7 @@ import java.util.Objects;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
 import org.parceler.Parcels;
@@ -60,6 +67,7 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
     Uri contentURI;
     boolean changesMade = false;
     private Context mContext;
+    DatabaseReference mRef;
 
     public static DesignEditorFragment NewInstance(DesignerDesigns designerDesigns) {
         Bundle b = new Bundle();
@@ -83,18 +91,19 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
         ButterKnife.bind(this, view);
         Bundle dd = getArguments();
         designerDesigns = Parcels.unwrap(dd.getParcelable("design"));
-        Log.e(TAG, "id: "+designerDesigns.getId());
+        Log.e(TAG, "id: " + designerDesigns.getId());
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_close_white_24dp);
         toolbar.setNavigationOnClickListener(v -> getDialog().dismiss());
         toolbar.setTitle(designerDesigns.getTemplateName());
         toolbar.setTitleTextAppearance(mContext, R.style.ToolbarTheme);
+        mRef = FirebaseDatabase.getInstance().getReference();
         initialize();
         return view;
     }
 
     private void initialize() {
-        Picasso.get().load(designerDesigns.getImageUrl()).into(templateImageview);
+        Glide.with(this).load(designerDesigns.getImageUrl()).apply(new RequestOptions().placeholder(R.drawable.loading_img)).into(templateImageview);
     }
 
     @OnClick(R.id.change_image)
@@ -104,11 +113,46 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
     }
 
     @OnClick(R.id.save)
-    void saveNew(){
+    void saveNew() {
         DesignerHomeFragment.uploadFile(contentURI, mContext, designerDesigns.getTemplateName(), true, designerDesigns.getId(), designerDesigns);
         changesMade = false;
     }
-    
+
+    @OnClick(R.id.delete)
+    public void deleteImage() {
+        DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE: {
+                        Toast.makeText(mContext, "Deleting, please wait", Toast.LENGTH_SHORT).show();
+                        mRef.child("designer/designs").child(designerDesigns.getId()).removeValue().addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(mContext, "Template deleted", Toast.LENGTH_SHORT).show();
+                                getDialog().dismiss();
+                            } else {
+                                Toast.makeText(mContext, "Template was not deleted", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                    dialog.dismiss();
+                }
+            }
+        };
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setTitle("Delete " + designerDesigns.getTemplateName())
+                .setMessage("Confirm image deletion")
+                .setCancelable(false)
+                .setNegativeButton("Cancel", onClickListener)
+                .setPositiveButton("Yes", onClickListener);
+        final AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(dialog1 -> {
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(mContext, R.color.green_600));
+            dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(mContext, R.color.red_600));
+        });
+        dialog.show();
+    }
+
 
     private void requestCameraPermission() {
         if (!EasyPermissions.hasPermissions(mContext,
@@ -206,7 +250,7 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
     @Override
     public void onResume() {
         super.onResume();
-        if(getView() == null){
+        if (getView() == null) {
             return;
         }
 
@@ -214,10 +258,10 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
         getView().requestFocus();
         getView().setOnKeyListener((v, keyCode, event) -> {
 
-            if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK){
+            if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
                 AlertDialog.OnClickListener clickListener = (dialog, which) -> {
                     dialog.dismiss();
-                    switch (which){
+                    switch (which) {
                         case Dialog.BUTTON_NEGATIVE:
                             Objects.requireNonNull(getDialog()).cancel();
                             break;
@@ -231,7 +275,7 @@ public class DesignEditorFragment extends DialogFragment implements EasyPermissi
                             .setNegativeButton("Dismiss", clickListener);
 
                     builder.show();
-                }else {
+                } else {
                     getDialog().cancel();
                 }
 

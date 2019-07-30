@@ -274,12 +274,12 @@ public class LoginActivity extends AppCompatActivity implements EasyPermissions.
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String version = pInfo.versionName;
             Log.e("log", version);
-            if (!preferences.contains("hasSigned")) {
-                if (version.equalsIgnoreCase("2.0"))
+            if (!preferences.contains("has2.1Signed")) {
+                if (version.equalsIgnoreCase("2.1"))
                     FirebaseAuth.getInstance().signOut();
                 user = FirebaseAuth.getInstance().getCurrentUser();
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putBoolean("hasSigned", true);
+                editor.putBoolean("has2.1Signed", true);
                 editor.apply();
             }
         } catch (PackageManager.NameNotFoundException e) {

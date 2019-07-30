@@ -5,7 +5,9 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,6 +24,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -38,6 +45,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -144,6 +152,7 @@ public class EditImageActivity extends BaseActivity implements OnPhotoEditorList
         // mPhotoEditorView.getSource().setImageResource(R.drawable.color_palette);
     }
 
+    @SuppressLint("CheckResult")
     private void initViews() {
         ImageView imgUndo;
         ImageView imgRedo;
@@ -162,29 +171,48 @@ public class EditImageActivity extends BaseActivity implements OnPhotoEditorList
             b = BitmapFactory.decodeStream(new FileInputStream(n));
             mPhotoEditorView.getSource().setImageBitmap(b);
         } catch (FileNotFoundException e) {
-            Toast.makeText(this, "This requested file is downloading, Please Wait", Toast.LENGTH_LONG).show();
-            Target target = new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    Toast.makeText(getApplicationContext(), "image loaded", Toast.LENGTH_SHORT).show();
-                    b = bitmap;
-                    mPhotoEditorView.getSource().setImageBitmap(bitmap);
-                }
+            Toast.makeText(this, "This requested file is downloading, Please Wait", Toast.LENGTH_SHORT).show();
+//            Target target = new Target() {
+//                @Override
+//                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+//                    Toast.makeText(getApplicationContext(), "image loaded", Toast.LENGTH_SHORT).show();
+//                    b = bitmap;
+//                    mPhotoEditorView.getSource().setImageBitmap(bitmap);
+//                }
+//
+//                @SuppressLint("SetTextI18n")
+//                @Override
+//                public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+//                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+//                }
+//
+//                @Override
+//                public void onPrepareLoad(Drawable placeHolderDrawable) {
+//
+//                }
+//            };
 
-                @SuppressLint("SetTextI18n")
-                @Override
-                public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                }
+            Glide.with(this)
+                    .load(designerDesigns.getImageUrl())
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, com.bumptech.glide.request.target.Target<Drawable> target, boolean isFirstResource) {
+                            Toast.makeText(EditImageActivity.this, "Can't load image for editing", Toast.LENGTH_LONG).show();
+                            finish();
+                            return false;
+                        }
 
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, com.bumptech.glide.request.target.Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            Toast.makeText(getApplicationContext(), "ff", Toast.LENGTH_LONG).show();
+                            return false;
+                        }
+                    }).into(mPhotoEditorView.getSource());
 
-                }
-            };
-            Picasso.get().load(designerDesigns.getImageUrl())
-                    .into(target);
+//            Picasso.get().load(designerDesigns.getImageUrl())
+//                    .into(target);
         }
+
 
         imgUndo = findViewById(R.id.imgUndo);
         imgUndo.setOnClickListener(this);
@@ -218,6 +246,30 @@ public class EditImageActivity extends BaseActivity implements OnPhotoEditorList
             }
         });
     }
+
+
+    public static Bitmap drawableToBitmap(Drawable drawable) {
+        Bitmap bitmap = null;
+
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if (bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
+            }
+        }
+
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
 
     @Override
     public void onAddViewListener(ViewType viewType, int numberOfAddedViews) {
@@ -535,6 +587,7 @@ public class EditImageActivity extends BaseActivity implements OnPhotoEditorList
         TransitionManager.beginDelayedTransition(mRootView, changeBounds);
         mConstraintSet.applyTo(mRootView);
     }
+
     @Override
     public void onBackPressed() {
         if (mIsFilterVisible) {

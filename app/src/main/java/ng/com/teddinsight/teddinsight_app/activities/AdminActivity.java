@@ -1,8 +1,10 @@
 package ng.com.teddinsight.teddinsight_app.activities;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -13,9 +15,17 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.evernote.android.state.State;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -27,24 +37,32 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 
+import java.util.UUID;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ng.com.teddinsight.teddinsight_app.R;
 import ng.com.teddinsight.teddinsight_app.fragments.AdminHomeFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.ClientsDetailFragment;
+import ng.com.teddinsight.teddinsight_app.fragments.ContentCuratorHomeFragment;
+import ng.com.teddinsight.teddinsight_app.fragments.NoteFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.PartnerDetailsFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.ClientListFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.CustomerSupportFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.DesignsFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.LogsFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.ScheduledPostFragment;
+import ng.com.teddinsight.teddinsight_app.models.ContentNotes;
 import ng.com.teddinsight.teddinsight_app.models.SocialAccounts;
+import ng.com.teddinsight.teddinsight_app.utils.ExtraUtils;
 import ng.com.teddinsight.teddinsightchat.fragments.ChatListFragment;
 
+import ng.com.teddinsight.teddinsightchat.models.Notifications;
 import ng.com.teddinsight.teddinsightchat.models.User;
-import ng.com.teddinsight.teddinsightchat.utils.ExtraUtils;
 
-public class AdminActivity extends BaseActivity implements ClientListFragment.ClientItemClickedListener {
+import static ng.com.teddinsight.teddinsight_app.activities.DCSHomeActivity.LOG_TAG;
+
+public class AdminActivity extends BaseActivity implements ClientListFragment.ClientItemClickedListener, ContentCuratorHomeFragment.OnFragmentInteractionListener {
     Drawer drawer;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -58,6 +76,9 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
     @State
     long currentState;
     private String role;
+    private DatabaseReference reference;
+    private DatabaseReference notifReference;
+    private ValueEventListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +88,7 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
         setSupportActionBar(toolbar);
         fragmentManager = getSupportFragmentManager();
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        reference = FirebaseDatabase.getInstance().getReference();
         if (preferences.contains("firstName")) {
             firstName = preferences.getString("firstName", "First");
             lastName = preferences.getString("lastName", "Last");
@@ -99,6 +121,7 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
                         item1,
                         new PrimaryDrawerItem().withName("Scheduled Posts").withIcon(GoogleMaterial.Icon.gmd_schedule).withIdentifier(2).withTypeface(typeface),
                         new PrimaryDrawerItem().withName("Designs").withIcon(GoogleMaterial.Icon.gmd_image_aspect_ratio).withIdentifier(9).withTypeface(typeface),
+                        new PrimaryDrawerItem().withName("Content Notes").withIcon(GoogleMaterial.Icon.gmd_event_note).withIdentifier(10).withTypeface(typeface),
                         conversationDrawerItem,
                         new PrimaryDrawerItem().withName("Logs").withIcon(GoogleMaterial.Icon.gmd_note).withIdentifier(4).withTypeface(typeface),
                         new DividerDrawerItem(),
@@ -128,8 +151,10 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
                             replaceFragmentContainerContent(CustomerSupportFragment.NewInstance(), false);
                         else if (identifier == 4) {
                             replaceFragmentContainerContent(LogsFragment.NewInstance(), false);
-                        }else if (identifier == 9)
+                        } else if (identifier == 9)
                             replaceFragmentContainerContent(DesignsFragment.NewInstance(User.USER_ADMIN), false);
+                        else if (identifier == 10)
+                            replaceFragmentContainerContent(ContentCuratorHomeFragment.NewInstance(User.USER_ADMIN), false);
                     }
                     return false;
                 })
@@ -139,7 +164,48 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
         fragmentManager.addOnBackStackChangedListener(() -> {
             toolbar.setVisibility(fragmentManager.getBackStackEntryCount() > 0 ? View.GONE : View.VISIBLE);
         });
+        listener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.e(LOG_TAG, "new notification");
+                Notifications notifications = dataSnapshot.getValue(Notifications.class);
+                if (notifications != null && currentState != 3) {
+                    int count = notifications.count;
+                    if (count > 0) {
+                        String countText = count > 99 ? "9+" : String.valueOf(count);
+                        conversationDrawerItem.withBadge(countText).withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700));
+                        Toast.makeText(AdminActivity.this, "You have unread messages", Toast.LENGTH_LONG).show();
+                        ExtraUtils.playSound(getApplication());
+                    } else {
+                        conversationDrawerItem.withBadge("").withBadgeStyle(new BadgeStyle().withColorRes(R.color.md_amber_50));
+                    }
+                    drawer.updateItem(conversationDrawerItem);
+                }
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        addListenerForNewNotification();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        notifReference.removeEventListener(listener);
+    }
+
+    private void addListenerForNewNotification() {
+        notifReference = reference.child(Notifications.getTableName()).child(user.getUid());
+        notifReference.addValueEventListener(listener);
     }
 
     void replaceFragmentContainerContent(Fragment fragment, boolean shouldAddBackstack) {
@@ -211,5 +277,19 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
                 intent = new Intent();
         }
         startActivity(intent);
+    }
+
+    @Override
+    public void onFragmentInteraction(TextView title, TextView note, ContentNotes contentNotes) {
+        contentNotes.viewer = User.USER_ADMIN;
+        contentNotes.titleTransitionName = contentNotes.getKey().concat(UUID.randomUUID().toString());
+        contentNotes.noteTransitionName = contentNotes.getKey().concat(UUID.randomUUID().toString());
+        ViewCompat.setTransitionName(title, contentNotes.titleTransitionName);
+        ViewCompat.setTransitionName(note, contentNotes.noteTransitionName);
+        getSupportFragmentManager().beginTransaction()
+                .addSharedElement(note, contentNotes.noteTransitionName)
+                .addToBackStack(null)
+                .replace(R.id.frame_container, NoteFragment.NewInstance(contentNotes))
+                .commit();
     }
 }

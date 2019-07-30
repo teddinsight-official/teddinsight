@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -46,11 +47,14 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import org.parceler.Parcels;
+
+import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -58,12 +62,15 @@ import ng.com.teddinsight.teddinsight_app.R;
 import ng.com.teddinsight.teddinsight_app.application.AppApplication;
 import ng.com.teddinsight.teddinsight_app.fragments.ClientListFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.ClientUploadsDialog;
+import ng.com.teddinsight.teddinsight_app.fragments.ContentCuratorHomeFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.DesignerHomeFragment;
+import ng.com.teddinsight.teddinsight_app.fragments.NoteFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.ScheduledPostFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.SocialAccountFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.SocialMediaManagerHomeFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.TaskFragment;
 import ng.com.teddinsight.teddinsight_app.listeners.Listeners;
+import ng.com.teddinsight.teddinsight_app.models.ContentNotes;
 import ng.com.teddinsight.teddinsight_app.models.DesignerDesigns;
 import ng.com.teddinsight.teddinsight_app.models.Notifications;
 import ng.com.teddinsight.teddinsight_app.models.SocialAccounts;
@@ -83,7 +90,7 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
         ClientListFragment.ClientItemClickedListener,
         ng.com.teddinsight.teddinsightchat.listeners.Listeners.StaffItemListener,
         ClientUploadsDialog.InitializeFileDownload,
-        Listeners.SocialAccountsListener {
+        Listeners.SocialAccountsListener, ContentCuratorHomeFragment.OnFragmentInteractionListener {
     public static final String FRAGMENT_HOME = "home";
     public static final String FRAGMENT_TASK = "task";
     public static final String FRAGMENT_CONVERSATION = "conversatiom";
@@ -101,6 +108,8 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     DatabaseReference onlineRef, socialAccountRef;
     DatabaseReference currentUserRef;
+    DatabaseReference notifRef;
+    ValueEventListener valueEventListener;
     private String currentFragment = FRAGMENT_HOME;
     boolean isNavigationBarHidden = true;
     public static final String CLIENT_PATH = "/Teddinsight/ClientUploads";
@@ -123,10 +132,18 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
                 if (currentFragment.equals(FRAGMENT_HOME))
                     return false;
                 currentFragment = FRAGMENT_HOME;
-                if (role.equals(User.USER_SOCIAL))
-                    replaceFragmentContainerContent(new SocialMediaManagerHomeFragment(), false);
-                else
-                    replaceFragmentContainerContent(DesignerHomeFragment.NewInstance(), false);
+                switch (role) {
+                    case User.USER_SOCIAL:
+                        replaceFragmentContainerContent(new SocialMediaManagerHomeFragment(), false);
+                        break;
+                    case User.USER_DESIGNER:
+                        replaceFragmentContainerContent(DesignerHomeFragment.NewInstance(), false);
+                        break;
+                    case User.USER_CONTENT:
+                        replaceFragmentContainerContent(ContentCuratorHomeFragment.NewInstance(User.USER_CONTENT), false);
+                        break;
+                }
+
                 return true;
 
             case R.id.navigation_dashboard:
@@ -196,10 +213,17 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) designerContents.getLayoutParams();
         if (savedInstanceState == null) {
             navigation.setVisibility(View.VISIBLE);
-            if (role.equals(User.USER_SOCIAL))
-                replaceFragmentContainerContent(new SocialMediaManagerHomeFragment(), false);
-            else
-                replaceFragmentContainerContent(DesignerHomeFragment.NewInstance(role), false);
+            switch (role) {
+                case User.USER_SOCIAL:
+                    replaceFragmentContainerContent(new SocialMediaManagerHomeFragment(), false);
+                    break;
+                case User.USER_DESIGNER:
+                    replaceFragmentContainerContent(DesignerHomeFragment.NewInstance(role), false);
+                    break;
+                case User.USER_CONTENT:
+                    replaceFragmentContainerContent(ContentCuratorHomeFragment.NewInstance(User.USER_CONTENT), false);
+                    break;
+            }
             params.setMargins(0, 0, 0, marginBottomInDp);
             designerContents.setLayoutParams(params);
         } else {
@@ -248,9 +272,7 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
             }
         });
 
-        addBadgeView();
     }
-
 
     private void sendTwitterDetailsToDatabase(SocialAccounts socialAccounts) {
         TwitterAuthToken authToken = new TwitterAuthToken(socialAccounts.getTwitterUserToken(), socialAccounts.getTwitterSecreteToken());
@@ -341,19 +363,24 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
         View notificationBadge1 = LayoutInflater.from(DCSHomeActivity.this).inflate(R.layout.notification_badge_layout, menuView, false);
         AppCompatTextView appCompatTextView1 = notificationBadge1.findViewById(R.id.badge);
         itemView1.addView(notificationBadge1);
-        databaseReference.child(Notifications.getTableName()).child(user.getUid()).addValueEventListener(new ValueEventListener() {
+        notifRef = databaseReference.child(Notifications.getTableName()).child(user.getUid());
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Notifications notifications = dataSnapshot.getValue(Notifications.class);
                 if (notifications != null) {
                     if (notifications.newTaskReceived && !currentFragment.equals(FRAGMENT_TASK)) {
                         notificationBadge.setVisibility(View.VISIBLE);
+                        ng.com.teddinsight.teddinsight_app.utils.ExtraUtils.playSound(getApplication());
+                        Toast.makeText(DCSHomeActivity.this, "You have new tasks", Toast.LENGTH_LONG).show();
                     } else {
                         notificationBadge.setVisibility(View.INVISIBLE);
                     }
                     long count = notifications.count;
                     if (count > 0 && !currentFragment.equals(FRAGMENT_CONVERSATION)) {
                         notificationBadge1.setVisibility(View.VISIBLE);
+                        ng.com.teddinsight.teddinsight_app.utils.ExtraUtils.playSound(getApplication());
+                        Toast.makeText(DCSHomeActivity.this, "You have unread messages", Toast.LENGTH_LONG).show();
                     } else {
                         notificationBadge1.setVisibility(View.INVISIBLE);
                     }
@@ -367,14 +394,14 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
+        };
+        notifRef.addValueEventListener(valueEventListener);
 
     }
 
     public void goBack(View view) {
         onBackPressed();
     }
-
 
     @Override
     public void onClientItemClicked(String businessName) {
@@ -417,6 +444,7 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
     @Override
     protected void onStart() {
         super.onStart();
+        addBadgeView();
         Menu menu = navigation.getMenu();
         if (role.equals(User.USER_SOCIAL)) {
             menu.removeItem(R.id.navigation_client_upload);
@@ -449,6 +477,7 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
     protected void onStop() {
         super.onStop();
         currentUserRef.setValue(ServerValue.TIMESTAMP);
+        notifRef.removeEventListener(valueEventListener);
     }
 
     public void signOut(View view) {
@@ -487,4 +516,29 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
     public void onTwitterButtonClicked() {
         twitterLoginButton.performClick();
     }
+
+    @Override
+    public void onFragmentInteraction(TextView title, TextView note, ContentNotes contentNotes) {
+        if (contentNotes != null) {
+            contentNotes.viewer = User.USER_CONTENT;
+            contentNotes.titleTransitionName = contentNotes.getKey().concat(UUID.randomUUID().toString());
+            contentNotes.noteTransitionName = contentNotes.getKey().concat(UUID.randomUUID().toString());
+            ViewCompat.setTransitionName(title, contentNotes.titleTransitionName);
+            ViewCompat.setTransitionName(note, contentNotes.noteTransitionName);
+            getSupportFragmentManager().beginTransaction()
+                    .addSharedElement(note, contentNotes.noteTransitionName)
+                    .addToBackStack(null)
+                    .replace(R.id.designer_contents, NoteFragment.NewInstance(contentNotes))
+                    .commit();
+        } else {
+            contentNotes = new ContentNotes();
+            contentNotes.viewer = User.USER_CONTENT;
+            getSupportFragmentManager().beginTransaction()
+                    .addToBackStack(null)
+                    .replace(R.id.designer_contents, NoteFragment.NewInstance(contentNotes))
+                    .commit();
+        }
+    }
+
+
 }

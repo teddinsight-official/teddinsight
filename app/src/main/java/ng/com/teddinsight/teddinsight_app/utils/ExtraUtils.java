@@ -1,9 +1,12 @@
 package ng.com.teddinsight.teddinsight_app.utils;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -19,6 +22,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import ng.com.teddinsight.teddinsight_app.R;
 
 public class ExtraUtils {
 
@@ -139,5 +144,15 @@ public class ExtraUtils {
         activity.startActivity(Intent.createChooser(share, "Select Instagram"));
     }
 
+
+    public static void playSound(Application application) {
+        try {
+            Uri s = Uri.parse("android.resource://" + application.getPackageName() + "/" + R.raw.chime);
+            Ringtone r = RingtoneManager.getRingtone(application.getApplicationContext(), s);
+            r.play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

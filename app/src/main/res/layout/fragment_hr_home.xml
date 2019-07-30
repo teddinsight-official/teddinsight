@@ -73,7 +73,7 @@
         android:layout_marginRight="7dp"
         android:foreground="?attr/selectableItemBackground"
         android:onClick="showStaffList"
-        android:src="@drawable/ic_chat"
+        app:srcCompat="@drawable/ic_chat"
         app:layout_constraintRight_toRightOf="@id/notif_text"
         app:layout_constraintTop_toTopOf="parent" />
 

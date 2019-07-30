@@ -102,4 +102,12 @@
     <string name="post_title_description">Post title/description</string>
     <string name="no_uploads_for_client">You haven\'t uploaded any files for</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="error">An error occurred</string>
+    <string name="drop_new_content">Add a new content...</string>
+    <string name="title">Title</string>
+    <string name="note">Note</string>
+    <string name="no_notes">No saved notes</string>
+
 </resources>
