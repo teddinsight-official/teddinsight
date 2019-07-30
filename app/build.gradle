@@ -22,6 +22,9 @@ def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
+    lintOptions {
+        checkReleaseBuilds false
+    }
     dataBinding.enabled = true
     signingConfigs {
         tedd {
@@ -37,8 +40,8 @@ android {
         minSdkVersion 19
         targetSdkVersion 28
         multiDexEnabled true
-        versionCode 11
-        versionName "2.1"
+        versionCode 12
+        versionName "2.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }

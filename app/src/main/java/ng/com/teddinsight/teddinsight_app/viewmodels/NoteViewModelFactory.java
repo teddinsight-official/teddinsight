@@ -17,6 +17,7 @@ public class NoteViewModelFactory implements ViewModelProvider.Factory {
         this.contentNotes = contentNotes;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     @NonNull
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
