@@ -109,5 +109,8 @@
     <string name="title">Title</string>
     <string name="note">Note</string>
     <string name="no_notes">No saved notes</string>
-
+    <string name="channel_name">Message Notification</string>
+    <string name="channel_description">Notifications which pops up on when events happens on the app</string>
+    <string name="created_at">Created at: %s</string>
+    <string name="task_count">%s tasks</string>
 </resources>

@@ -7,10 +7,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.evernote.android.state.State;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -211,15 +214,16 @@ public class ClientListFragment extends Fragment {
         class ClientListViewHolder extends RecyclerView.ViewHolder {
             @BindView(R.id.client_businessName)
             TextView clientBusinessName;
+            @BindView(R.id.image)
+            ImageView imageView;
 
             private ClientListViewHolder(@NonNull View itemView) {
                 super(itemView);
                 ButterKnife.bind(this, itemView);
                 itemView.setOnClickListener(v -> {
-                    if (isAdminView || socialAccounts != null){
+                    if (isAdminView || socialAccounts != null) {
                         clientItemClickedListener.onClientItemClicked(clientList.get(getAdapterPosition()), socialAccounts);
-                    }
-                    else
+                    } else
                         clientItemClickedListener.onClientItemClicked(clienUploadtList.get(getAdapterPosition()));
 
                 });
@@ -227,6 +231,17 @@ public class ClientListFragment extends Fragment {
 
             private void bindClients(User user) {
                 clientBusinessName.setText(role.equalsIgnoreCase(User.USER_CLIENT) ? user.getBusinessName() : user.getFirstName().concat(" ").concat(user.getLastName()));
+                if (user.role.equals(User.USER_CLIENT)) {
+                    imageView.setVisibility(View.VISIBLE);
+                    String businesslogo = (user.getProfileImageUrl() == null || TextUtils.isEmpty(user.getProfileImageUrl())) ?
+                            "https://i.cbc.ca/1.4663764!/fileImage/httpImage/image.jpg_gen/derivatives/16x9_1180/business-video-thumbnail.jpg" :
+                            user.getProfileImageUrl();
+                    Glide.with(mContext).load(businesslogo)
+                            .apply(new RequestOptions().placeholder(R.drawable.loading_img))
+                            .into(imageView);
+                } else {
+                    imageView.setVisibility(View.GONE);
+                }
             }
         }
     }

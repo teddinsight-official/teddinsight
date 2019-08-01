@@ -83,6 +83,8 @@ public class ClientsDetailFragment extends Fragment {
                 case 0:
                     return PartnerDetailsFragment.NewInstance(user);
                 case 1:
+                    return ClientCalendarFragment.NewInstance();
+                case 2:
                     return ClientUploadsFragment.NewInstance(user);
                 default:
                     return new Fragment();
@@ -91,7 +93,7 @@ public class ClientsDetailFragment extends Fragment {
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
 
         @Override
@@ -100,9 +102,9 @@ public class ClientsDetailFragment extends Fragment {
                 case 0:
                     return "Services";
                 case 1:
-                    return "Reports";
+                    return "Calendar";
                 default:
-                    return null;
+                    return "Report";
 
             }
         }

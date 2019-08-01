@@ -1,15 +1,20 @@
 package ng.com.teddinsight.teddinsight_app.application;
 
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.crashlytics.android.Crashlytics;
@@ -32,6 +37,10 @@ import com.squareup.picasso.Picasso;
 import com.twitter.sdk.android.core.Twitter;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
+import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.multidex.MultiDex;
 
 import java.io.File;
@@ -43,6 +52,78 @@ import ng.com.teddinsight.teddinsight_app.utils.AppExecutors;
 import ng.com.teddinsight.teddinsightchat.models.User;
 
 public class AppApplication extends Application {
+
+   /* class AppLifecycleTracker implements Application.ActivityLifecycleCallbacks {
+
+        private int numStarted = 0;
+
+        @Override
+        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+
+        }
+
+        @Override
+        public void onActivityStarted(Activity activity) {
+            if (numStarted == 0) {
+                Log.e("TAG", "App came to foreground");
+            }
+            numStarted++;
+        }
+
+        @Override
+        public void onActivityResumed(Activity activity) {
+
+        }
+
+        @Override
+        public void onActivityPaused(Activity activity) {
+
+        }
+
+        @Override
+        public void onActivityStopped(Activity activity) {
+            numStarted--;
+            if (numStarted == 0) {
+                Log.e("TAG", "app went to background");
+                Toast.makeText(getApplicationContext(), "background", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+
+        }
+
+        @Override
+        public void onActivityDestroyed(Activity activity) {
+
+        }
+    }*/
+
+    public class AppLifecycleListener implements LifecycleObserver {
+
+        private SharedPreferences.Editor editor;
+        private SharedPreferences sharedPreferences;
+        public static final String CAN_SHOW_NOTIFICATION = "show_notification";
+
+        public AppLifecycleListener() {
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        }
+
+        @OnLifecycleEvent(Lifecycle.Event.ON_START)
+        public void onMoveToForeground() {
+            // app moved to foreground
+            editor = sharedPreferences.edit();
+            editor.putBoolean(CAN_SHOW_NOTIFICATION, false).apply();
+        }
+
+        @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+        public void onMoveToBackground() {
+            // app moved to background
+            editor = sharedPreferences.edit();
+            editor.putBoolean(CAN_SHOW_NOTIFICATION, true).apply();
+        }
+    }
 
     private static AppApplication sPhotoApp;
     private static final String TAG = AppApplication.class.getSimpleName();
@@ -62,7 +143,10 @@ public class AppApplication extends Application {
         StateSaver.setEnabledForAllActivitiesAndSupportFragments(this, true);
         sPhotoApp = this;
         instance = sPhotoApp;
+        //registerActivityLifecycleCallbacks(new AppLifecycleTracker());
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(new AppLifecycleListener());
         doInstantationInBackground();
+
     }
 
     public void clearApplicationData() {
@@ -102,7 +186,7 @@ public class AppApplication extends Application {
         return sPhotoApp.getContext();
     }
 
-    private void doInstantationInBackground(){
+    private void doInstantationInBackground() {
         AppExecutors.getInstance().diskIO().execute(() -> {
             PRDownloader.initialize(getApplicationContext());
             if (!FirebaseApp.getApps(getApplicationContext()).isEmpty()) {
