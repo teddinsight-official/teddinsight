@@ -42,7 +42,10 @@ import java.util.UUID;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ng.com.teddinsight.teddinsight_app.R;
+import ng.com.teddinsight.teddinsight_app.adapter.ClientCalendarAdapter;
 import ng.com.teddinsight.teddinsight_app.fragments.AdminHomeFragment;
+import ng.com.teddinsight.teddinsight_app.fragments.ClientCalendarDetailFragment;
+import ng.com.teddinsight.teddinsight_app.fragments.ClientCalendarFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.ClientsDetailFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.ContentCuratorHomeFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.NoteFragment;
@@ -52,6 +55,7 @@ import ng.com.teddinsight.teddinsight_app.fragments.CustomerSupportFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.DesignsFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.LogsFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.ScheduledPostFragment;
+import ng.com.teddinsight.teddinsight_app.models.ClientCalendar;
 import ng.com.teddinsight.teddinsight_app.models.ContentNotes;
 import ng.com.teddinsight.teddinsight_app.models.SocialAccounts;
 import ng.com.teddinsight.teddinsight_app.utils.ExtraUtils;
@@ -62,7 +66,7 @@ import ng.com.teddinsight.teddinsightchat.models.User;
 
 import static ng.com.teddinsight.teddinsight_app.activities.DCSHomeActivity.LOG_TAG;
 
-public class AdminActivity extends BaseActivity implements ClientListFragment.ClientItemClickedListener, ContentCuratorHomeFragment.OnFragmentInteractionListener {
+public class AdminActivity extends BaseActivity implements ClientListFragment.ClientItemClickedListener, ContentCuratorHomeFragment.OnFragmentInteractionListener, ClientCalendarAdapter.OnClientCalendarItemClick {
     Drawer drawer;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -190,6 +194,14 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
         };
     }
 
+    public void hideToolbar() {
+        toolbar.setVisibility(View.GONE);
+    }
+
+    public void showToobar() {
+        toolbar.setVisibility(View.VISIBLE);
+    }
+
 
     @Override
     protected void onStart() {
@@ -291,5 +303,10 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
                 .addToBackStack(null)
                 .replace(R.id.frame_container, NoteFragment.NewInstance(contentNotes))
                 .commit();
+    }
+
+    @Override
+    public void onClientCalendarItemClicked(ClientCalendar clientCalendar) {
+        replaceFragmentContainerContent(ClientCalendarDetailFragment.NewInstance(clientCalendar), true);
     }
 }

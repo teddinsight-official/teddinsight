@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+
+        <variable
+            name="task"
+            type="ng.com.teddinsight.teddinsight_app.models.Tasks" />
+    </data>
+
+    <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:paddingBottom="8dp"
+        app:cardElevation="5dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/task_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                app:layout_constraintBottom_toBottomOf="@id/deadline"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_list" />
+
+            <TextView
+                android:id="@+id/task_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="8dp"
+                android:fontFamily="@font/montserrat"
+                android:text="@{@string/client_task_title(task.taskTitle)}"
+                app:layout_constraintEnd_toStartOf="@+id/circle"
+                app:layout_constraintStart_toEndOf="@+id/task_image"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Task: TextView" />
+
+            <TextView
+                android:id="@+id/assigned_to"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
+                android:text="@{@string/task_assigned_to(task.assignedTo)}"
+                app:layout_constraintEnd_toEndOf="@+id/task_title"
+                app:layout_constraintStart_toStartOf="@+id/task_title"
+                app:layout_constraintTop_toBottomOf="@+id/task_title"
+                tools:text="Assigned to: Ifeoluwa Orimolade" />
+
+            <TextView
+                android:id="@+id/task_type"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="90dp"
+                android:layout_marginEnd="8dp"
+                android:fontFamily="@font/montserrat"
+                android:text="@{task.assignedToRole}"
+                android:textColor="@color/green_600"
+                app:layout_constraintEnd_toEndOf="@+id/assigned_to"
+                app:layout_constraintStart_toStartOf="@+id/task_title"
+                app:layout_constraintTop_toBottomOf="@+id/assigned_to"
+                tools:text="Creative Designer" />
+
+
+            <TextView
+                android:id="@+id/deadline"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:fontFamily="@font/montserrat"
+                android:paddingBottom="8dp"
+                android:textColor="@color/red_600"
+                app:formattedDeadlineDate="@{task.dueDate}"
+                app:layout_constraintEnd_toEndOf="@+id/task_type"
+                app:layout_constraintStart_toStartOf="@id/assigned_to"
+                app:layout_constraintTop_toBottomOf="@id/task_type"
+                tools:text="@string/deadline" />
+
+            <TextView
+                android:id="@+id/circle"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/circle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+</layout>

@@ -20,22 +20,36 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipChildren="false"
-            app:clientCalenderList="@{viewmodel.clientCalendarList()}"
             android:clipToPadding="false"
+            app:clientCalenderList="@{viewmodel.clientCalendarList()}"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:listitem="@layout/client_calendar_item">
 
         </androidx.recyclerview.widget.RecyclerView>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:onClick="@{() -> viewmodel.addDummyCalendar()}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
+            android:onClick="@{() -> viewmodel.addDummyCalendar()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_add_24dp" />
+
+        <ng.com.teddinsight.teddinsight_app.widgets.TextViewDrawableSize
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTop="@drawable/ic_calendar_card"
+            android:fontFamily="@font/montserrat"
+            android:text="@string/no_calendar_available_for_this_client"
+            app:compoundDrawableHeight="50dp"
+            app:compoundDrawableWidth="50dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:toggleEmptyCalendarVisibility="@{viewmodel.clientCalendarList()}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

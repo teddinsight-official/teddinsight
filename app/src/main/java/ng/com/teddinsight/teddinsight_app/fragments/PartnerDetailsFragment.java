@@ -25,6 +25,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -204,7 +206,7 @@ public class PartnerDetailsFragment extends Fragment {
         if (user.getProfileImageUrl() == null || TextUtils.isEmpty(user.getProfileImageUrl()))
             logoImageView.setImageResource(R.drawable.avatar);
         else
-            Picasso.get().load(user.getProfileImageUrl()).into(logoImageView);
+            Glide.with(mContext).load(user.getProfileImageUrl()).apply(new RequestOptions().placeholder(R.drawable.loading_img)).into(logoImageView);
         if (user.role.equalsIgnoreCase(User.USER_CLIENT)) {
             emptyView.setText(mContext.getString(R.string.no_service_req));
             businessName.setText(user.getBusinessName());

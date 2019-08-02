@@ -1,5 +1,7 @@
 package ng.com.teddinsight.teddinsight_app.models;
 
+import com.google.firebase.database.Exclude;
+
 import org.parceler.Parcel;
 
 @Parcel(Parcel.Serialization.BEAN)
@@ -13,6 +15,9 @@ public class ClientCalendar {
 
     public static String getBaseTableName() {
         return "clientCalendarBaseTable";
+    }
+    public static String getTableName() {
+        return "clientCalendarTable";
     }
 
     public ClientCalendar() {

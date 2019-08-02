@@ -1,14 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".fragments.ClientCalendarDetailFragment">
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <data>
+
+        <variable
+            name="viewmodel"
+            type="ng.com.teddinsight.teddinsight_app.viewmodels.ClientCalendarDetailsViewModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        tools:context=".fragments.ClientCalendarDetailFragment">
 
-</FrameLayout>
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:shadowColor="@color/white"
+                app:subtitleTextColor="@color/white"
+                app:title="@{viewmodel.getClientCalendar().getName()}"
+                app:titleTextColor="@color/white">
+
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tasks_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="56dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:taskLists="@{viewmodel.listOfCalendarTask()}"
+            tools:listitem="@layout/client_task_item">
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <ng.com.teddinsight.teddinsight_app.widgets.TextViewDrawableSize
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:drawableTop="@drawable/ic_list"
+            android:fontFamily="@font/montserrat"
+            android:gravity="center"
+            android:text="@string/this_calendar_has_no_task_create_one_now"
+            app:compoundDrawableHeight="50dp"
+            app:compoundDrawableWidth="50dp"
+            app:setEmptyViewVisibility="@{viewmodel.listOfCalendarTask()}" />
+
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/new_task_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="8dp"
+            android:onClick="@{() -> viewmodel.addDummyTask()}"
+            app:elevation="8dp"
+            app:srcCompat="@drawable/ic_add_24dp" />
+
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

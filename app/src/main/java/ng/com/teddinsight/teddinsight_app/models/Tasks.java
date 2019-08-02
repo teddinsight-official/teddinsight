@@ -3,6 +3,8 @@ package ng.com.teddinsight.teddinsight_app.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.Nullable;
+
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.ServerValue;
 
@@ -22,6 +24,10 @@ public class Tasks implements Parcelable {
     public boolean isDesigner;
     public boolean reminderSet;
     public int pendingIntentId;
+    public String assignedTo;
+    public String assignedToRole;
+    public String assignedToId;
+    public String clientCalendarId;
     public static final int TASK_COMPLETE = 1;
     public static final int TASK_INCOMPLETE = 0;
 
@@ -159,5 +165,10 @@ public class Tasks implements Parcelable {
         dest.writeByte((byte) (isDesigner ? 1 : 0));
         dest.writeByte((byte) (reminderSet ? 1 : 0));
         dest.writeInt(pendingIntentId);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return super.equals(obj);
     }
 }
