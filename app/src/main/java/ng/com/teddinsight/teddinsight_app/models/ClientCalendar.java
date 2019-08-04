@@ -1,7 +1,5 @@
 package ng.com.teddinsight.teddinsight_app.models;
 
-import com.google.firebase.database.Exclude;
-
 import org.parceler.Parcel;
 
 @Parcel(Parcel.Serialization.BEAN)

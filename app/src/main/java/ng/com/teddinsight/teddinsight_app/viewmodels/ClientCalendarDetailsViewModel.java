@@ -1,5 +1,6 @@
 package ng.com.teddinsight.teddinsight_app.viewmodels;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -29,13 +30,29 @@ import ng.com.teddinsight.teddinsight_app.widgets.TextViewDrawableSize;
 import ng.com.teddinsight.teddinsightchat.models.User;
 
 public class ClientCalendarDetailsViewModel extends ViewModel {
-    private ClientCalendar clientCalendar;
+    //private ClientCalendar clientCalendar;
+    private MutableLiveData<ClientCalendar> _clientCalendar = new MutableLiveData<>();
     private DatabaseReference databaseReference;
     private ValueEventListener taskValueEventListener;
     private Query query;
 
     private MutableLiveData<List<Tasks>> _listOfCalendarTask = new MutableLiveData<>();
     private MutableLiveData<String> _message = new MutableLiveData<>();
+    private MutableLiveData<Tasks> _creatNewTask = new MutableLiveData<>();
+    private MutableLiveData<ClientCalendar> _clientCaledarToPublish = new MutableLiveData<>();
+
+
+    public LiveData<ClientCalendar> getClientCalendar(){
+        return _clientCalendar;
+    }
+
+    public LiveData<Tasks> creatNewTask() {
+        return _creatNewTask;
+    }
+
+    public void stopCreateNewTask() {
+        _creatNewTask.setValue(null);
+    }
 
     public LiveData<String> message() {
         return _message;
@@ -60,30 +77,23 @@ public class ClientCalendarDetailsViewModel extends ViewModel {
 
     @BindingAdapter("setEmptyViewVisibility")
     public static void setEmptyListVisibility(TextViewDrawableSize textView, List lists) {
-        if (lists.isEmpty())
+        if (lists != null && lists.isEmpty())
             textView.setVisibility(View.VISIBLE);
         else
             textView.setVisibility(View.GONE);
     }
 
-    public ClientCalendar getClientCalendar() {
-        return clientCalendar;
-    }
-
     public void addDummyTask() {
         Tasks tasks = new Tasks();
-        tasks.setTaskTitle("fdg");
-        tasks.setTaskDescription("fdgfdfgfni");
-        tasks.setAssignedBy("dgog");
-        tasks.setAssignedOn(System.currentTimeMillis());
-        tasks.assignedTo = "sfdgfh";
-        tasks.assignedToRole = User.USER_CONTENT;
-        String key = databaseReference.push().getKey();
-        databaseReference.child(key).setValue(tasks);
+        tasks.setTaskTitle("");
+        tasks.setTaskDescription("");
+        tasks.clientCalendarId = getClientCalendar().getValue().getKey();
+        tasks.setDueDate(System.currentTimeMillis());
+        _creatNewTask.setValue(tasks);
     }
 
     public ClientCalendarDetailsViewModel(ClientCalendar clientCalendar) {
-        this.clientCalendar = clientCalendar;
+        _clientCalendar.setValue(clientCalendar);
         _listOfCalendarTask.setValue(new ArrayList<>());
         _message.setValue(null);
         taskValueEventListener = new ValueEventListener() {
@@ -96,7 +106,7 @@ public class ClientCalendarDetailsViewModel extends ViewModel {
                         tasks.setId(snapshot.getKey());
                         tasksList.add(tasks);
                     }
-                }else {
+                } else {
                     _message.setValue("Calendar has no task in it");
                 }
                 _listOfCalendarTask.setValue(tasksList);
@@ -107,12 +117,13 @@ public class ClientCalendarDetailsViewModel extends ViewModel {
                 _message.setValue("An error occurred: " + databaseError.getDetails());
             }
         };
-        databaseReference = FirebaseDatabase.getInstance().getReference().child(ClientCalendar.getTableName()).child(Tasks.getTableName());
+        Log.e("TAG", clientCalendar.getName());
+        databaseReference = FirebaseDatabase.getInstance().getReference().child(ClientCalendar.getTableName()).child(clientCalendar.getKey()).child(Tasks.getTableName());
         query = databaseReference;
         query.addValueEventListener(taskValueEventListener);
     }
 
-    public void stopMessageDispatch(){
+    public void stopMessageDispatch() {
         _message.setValue(null);
     }
 
@@ -120,6 +131,6 @@ public class ClientCalendarDetailsViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
         query.removeEventListener(taskValueEventListener);
-        taskValueEventListener = null;
+        //taskValueEventListener = null;
     }
 }

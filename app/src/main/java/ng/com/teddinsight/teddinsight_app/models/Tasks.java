@@ -34,6 +34,11 @@ public class Tasks implements Parcelable {
     public Tasks() {
     }
 
+    public Tasks setDueDateReturnTask(long dueDate){
+        this.setDueDate(dueDate);
+        return this;
+    }
+
     public static String getTableName() {
         return "tasks";
     }

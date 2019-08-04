@@ -120,4 +120,10 @@
     <string name="task_assigned_to">Assigned to: %s</string>
     <string name="client_task_title">Task: %s</string>
     <string name="deadline">Deadline: %s</string>
+    <string name="create_new_task">Create New Task</string>
+    <string name="task_for">Task for</string>
+    <string name="save_task_to_calendar">Add task to calendar</string>
+    <string name="view_calendar_report">View calendar report</string>
+    <string name="delete_calendar">Delete calendar</string>
+    <string name="dispatch_tasks">Dispatch Tasks</string>
 </resources>

@@ -45,6 +45,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ng.com.teddinsight.teddinsight_app.R;
+import ng.com.teddinsight.teddinsight_app.utils.ExtraUtils;
 import ng.com.teddinsight.teddinsightchat.models.User;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -269,6 +270,7 @@ public class LoginActivity extends AppCompatActivity implements EasyPermissions.
     @Override
     protected void onStart() {
         super.onStart();
+        Log.e(TAG,ExtraUtils.getHumanReadableString(System.currentTimeMillis(), false));
         try {
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String version = pInfo.versionName;

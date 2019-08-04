@@ -15,8 +15,11 @@ import ng.com.teddinsight.teddinsight_app.models.Tasks;
 public class ClientCalendarTaskAdapter extends ListAdapter<Tasks, ClientCalendarTaskAdapter.ClientCalendarTaskViewHolder> {
 
 
-    public ClientCalendarTaskAdapter(@NonNull DiffUtil.ItemCallback<Tasks> diffCallback) {
+    public OnTaskClicked onTaskClicked;
+
+    public ClientCalendarTaskAdapter(@NonNull DiffUtil.ItemCallback<Tasks> diffCallback, OnTaskClicked onTaskClicked) {
         super(diffCallback);
+        this.onTaskClicked = onTaskClicked;
     }
 
     @NonNull
@@ -27,7 +30,7 @@ public class ClientCalendarTaskAdapter extends ListAdapter<Tasks, ClientCalendar
 
     @Override
     public void onBindViewHolder(@NonNull ClientCalendarTaskViewHolder holder, int position) {
-        holder.bind(getItem(position));
+        holder.bind(getItem(position), onTaskClicked);
     }
 
     static class ClientCalendarTaskViewHolder extends RecyclerView.ViewHolder {
@@ -43,8 +46,9 @@ public class ClientCalendarTaskAdapter extends ListAdapter<Tasks, ClientCalendar
             return new ClientCalendarTaskViewHolder(binding);
         }
 
-        public void bind(Tasks tasks) {
+        public void bind(Tasks tasks, OnTaskClicked onTaskClicked) {
             binding.setTask(tasks);
+            binding.itemview.setOnClickListener(v -> onTaskClicked.onTaskClicked(tasks));
             binding.executePendingBindings();
         }
 
@@ -61,5 +65,9 @@ public class ClientCalendarTaskAdapter extends ListAdapter<Tasks, ClientCalendar
         public boolean areContentsTheSame(@NonNull Tasks oldItem, @NonNull Tasks newItem) {
             return oldItem.equals(newItem);
         }
+    }
+
+    public interface OnTaskClicked {
+        void onTaskClicked(Tasks tasks);
     }
 }

@@ -220,7 +220,7 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
         notifReference.addValueEventListener(listener);
     }
 
-    void replaceFragmentContainerContent(Fragment fragment, boolean shouldAddBackstack) {
+    public void replaceFragmentContainerContent(Fragment fragment, boolean shouldAddBackstack) {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.setCustomAnimations(R.anim.enter, R.anim.leave, R.anim.pop_enter, R.anim.pop_leave);
         fragmentTransaction.replace(R.id.frame_container, fragment);

@@ -22,6 +22,7 @@ import ng.com.teddinsight.teddinsight_app.adapter.ClientCalendarTaskAdapter;
 import ng.com.teddinsight.teddinsight_app.adapter.ClientCalendarTaskAdapter.*;
 import ng.com.teddinsight.teddinsight_app.databinding.FragmentClientCalendarDetailBinding;
 import ng.com.teddinsight.teddinsight_app.models.ClientCalendar;
+import ng.com.teddinsight.teddinsight_app.models.Tasks;
 import ng.com.teddinsight.teddinsight_app.viewmodels.ClientCalendarDetailsViewModel;
 import ng.com.teddinsight.teddinsight_app.viewmodels.ClientCalendarDetailsViewModelFactory;
 
@@ -53,19 +54,31 @@ public class ClientCalendarDetailFragment extends Fragment {
         ClientCalendarDetailsViewModelFactory clientCalendarDetailsViewModelFactory = new ClientCalendarDetailsViewModelFactory(clientCalendar);
         ClientCalendarDetailsViewModel viewModel = ViewModelProviders.of(this, clientCalendarDetailsViewModelFactory).get(ClientCalendarDetailsViewModel.class);
         binding.setViewmodel(viewModel);
-        ClientCalendarTaskAdapter adapter = new ClientCalendarTaskAdapter(new ClientCalendarTaskDiffUtil());
+        ClientCalendarTaskAdapter adapter = new ClientCalendarTaskAdapter(new ClientCalendarTaskDiffUtil(), tasks -> {
+            tasks.clientCalendarId = clientCalendar.getKey();
+            getActivityCast().replaceFragmentContainerContent(NewTaskFragment.NewInstance(tasks), true);
+        });
         binding.tasksRecyclerView.setAdapter(adapter);
         binding.toolbar.setOnMenuItemClickListener(item -> {
-            if (item != null)
-                Toast.makeText(getContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
+            if (item != null) {
+
+            }
             return false;
         });
         viewModel.message().observe(this, s -> {
-            if (s != null)
+            if (s != null) {
                 showToast(s, Toast.LENGTH_LONG);
-            viewModel.stopMessageDispatch();
+                viewModel.stopMessageDispatch();
+            }
 
         });
+        viewModel.creatNewTask().observe(this, tasks -> {
+            if (tasks != null) {
+                getActivityCast().replaceFragmentContainerContent(NewTaskFragment.NewInstance(tasks), true);
+                viewModel.stopCreateNewTask();
+            }
+        });
+
         return binding.getRoot();
     }
 
