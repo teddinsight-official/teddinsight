@@ -28,6 +28,7 @@ public class Tasks implements Parcelable {
     public String assignedToRole;
     public String assignedToId;
     public String clientCalendarId;
+    public String clientId;
     public static final int TASK_COMPLETE = 1;
     public static final int TASK_INCOMPLETE = 0;
 

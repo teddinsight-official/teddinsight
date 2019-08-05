@@ -10,6 +10,7 @@ public class ClientCalendar {
     private long dateCreated = System.currentTimeMillis();
     private boolean needsPublishing;
     private boolean beginPublishing;
+    private String clientId;
 
     public static String getBaseTableName() {
         return "clientCalendarBaseTable";
@@ -19,6 +20,14 @@ public class ClientCalendar {
     }
 
     public ClientCalendar() {
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
     public String getKey() {

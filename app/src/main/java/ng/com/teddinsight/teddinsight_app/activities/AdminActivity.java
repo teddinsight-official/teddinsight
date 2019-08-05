@@ -163,7 +163,10 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
                     return false;
                 })
                 .build();
-        drawer.setSelection(1, true);
+        if (savedInstanceState == null) {
+            drawer.setSelection(1, true);
+        } else if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+            hideToolbar();
 
         fragmentManager.addOnBackStackChangedListener(() -> {
             toolbar.setVisibility(fragmentManager.getBackStackEntryCount() > 0 ? View.GONE : View.VISIBLE);
@@ -174,6 +177,7 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
                 Log.e(LOG_TAG, "new notification");
                 Notifications notifications = dataSnapshot.getValue(Notifications.class);
                 if (notifications != null && currentState != 3) {
+                    //fdfs
                     int count = notifications.count;
                     if (count > 0) {
                         String countText = count > 99 ? "9+" : String.valueOf(count);

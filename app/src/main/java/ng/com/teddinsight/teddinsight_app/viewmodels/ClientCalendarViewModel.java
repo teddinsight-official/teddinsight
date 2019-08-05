@@ -68,6 +68,7 @@ public class ClientCalendarViewModel extends ViewModel {
         String key = reference.push().getKey();
         clientCalendar.setBeginPublishing(false);
         clientCalendar.setNeedsPublishing(false);
+        clientCalendar.setClientId(clientId);
         clientCalendar.setTaskCount(0);
         reference.child(key).setValue(clientCalendar).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -77,6 +78,7 @@ public class ClientCalendarViewModel extends ViewModel {
             }
         });
     }
+
     public void stopShowError() {
         _message.setValue(null);
     }

@@ -1,7 +1,6 @@
 package ng.com.teddinsight.teddinsight_app.viewmodels;
 
 import android.text.TextUtils;
-import android.util.FloatProperty;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
