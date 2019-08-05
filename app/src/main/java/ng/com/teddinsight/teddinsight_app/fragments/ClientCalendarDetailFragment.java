@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import org.parceler.Parcels;
@@ -41,7 +42,6 @@ public class ClientCalendarDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         FragmentClientCalendarDetailBinding binding = FragmentClientCalendarDetailBinding.inflate(inflater, container, false);
-        binding.toolbar.inflateMenu(R.menu.client_calendar_menu);
         Bundle bundle = getArguments();
         ClientCalendar clientCalendar = Parcels.unwrap(bundle.getParcelable(CLIENT_CALENDAR_ITEM));
         binding.toolbar.setTitle(clientCalendar.getName());
@@ -58,6 +58,7 @@ public class ClientCalendarDetailFragment extends Fragment {
             getActivityCast().replaceFragmentContainerContent(NewTaskFragment.NewInstance(tasks), true);
         });
         binding.tasksRecyclerView.setAdapter(adapter);
+        binding.toolbar.inflateMenu(R.menu.client_calendar_menu);
         binding.toolbar.setOnMenuItemClickListener(item -> {
             if (item != null) {
                 switch (item.getItemId()) {
@@ -70,6 +71,12 @@ public class ClientCalendarDetailFragment extends Fragment {
                 }
             }
             return false;
+        });
+        viewModel.getClientCalendar().observe(this, clientCalendar13 -> {
+            if (clientCalendar13 != null && clientCalendar13.isBeginPublishing())
+                binding.toolbar.getMenu().getItem(0).setVisible(false);
+            else
+                binding.toolbar.getMenu().getItem(0).setVisible(true);
         });
         viewModel.message().observe(this, s -> {
             if (s != null) {

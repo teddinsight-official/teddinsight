@@ -35,7 +35,9 @@ public class ClientCalendarDetailsViewModel extends ViewModel {
     //private ClientCalendar clientCalendar;
     private MutableLiveData<ClientCalendar> _clientCalendar = new MutableLiveData<>();
     private DatabaseReference databaseReference;
+    private DatabaseReference clientCalendarReference;
     private ValueEventListener taskValueEventListener;
+    private ValueEventListener updatedClientCalendarListener;
     private Query query;
 
     private MutableLiveData<List<Tasks>> _listOfCalendarTask = new MutableLiveData<>();
@@ -164,8 +166,25 @@ public class ClientCalendarDetailsViewModel extends ViewModel {
                 _message.setValue("An error occurred: " + databaseError.getDetails());
             }
         };
-        Log.e("TAG", clientCalendar.getName());
-        databaseReference = FirebaseDatabase.getInstance().getReference().child(ClientCalendar.getTableName()).child(clientCalendar.getKey()).child(Tasks.getTableName());
+        updatedClientCalendarListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                ClientCalendar clientCalendar1 = dataSnapshot.getValue(ClientCalendar.class);
+                if (clientCalendar1 != null) {
+                    clientCalendar1.setKey(dataSnapshot.getKey());
+                    _clientCalendar.postValue(clientCalendar1);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                _message.setValue("state not refreshed, you may not be able to publish tasks immediately ".concat(databaseError.getDetails()));
+            }
+        };
+        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+        clientCalendarReference = rootRef.child(ClientCalendar.getBaseTableName()).child(clientCalendar.getClientId()).child(clientCalendar.getKey());
+        clientCalendarReference.addValueEventListener(updatedClientCalendarListener);
+        databaseReference = rootRef.child(ClientCalendar.getTableName()).child(clientCalendar.getKey()).child(Tasks.getTableName());
         query = databaseReference;
         query.addValueEventListener(taskValueEventListener);
     }
@@ -178,20 +197,18 @@ public class ClientCalendarDetailsViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
         query.removeEventListener(taskValueEventListener);
+        clientCalendarReference.removeEventListener(updatedClientCalendarListener);
         //taskValueEventListener = null;
     }
 
     public void performDelete(ClientCalendar clientCalendar) {
         _message.setValue("Deleting " + clientCalendar.getName());
-        FirebaseDatabase.getInstance().getReference().child(ClientCalendar.getBaseTableName()).child(clientCalendar.getKey()).setValue(null).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    _finishOperation.setValue(true);
-                    _message.setValue(clientCalendar.getName().concat(" has been deleted"));
-                } else {
-                    _message.setValue("An error occurred while deleting calendar " + task.getException().getLocalizedMessage());
-                }
+        FirebaseDatabase.getInstance().getReference().child(ClientCalendar.getBaseTableName()).child(clientCalendar.getClientId()).child(clientCalendar.getKey()).removeValue().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                _finishOperation.setValue(true);
+                _message.setValue(clientCalendar.getName().concat(" has been deleted"));
+            } else {
+                _message.setValue("An error occurred while deleting calendar " + task.getException().getLocalizedMessage());
             }
         });
     }
