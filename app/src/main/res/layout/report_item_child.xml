@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="reportitem"
+            type="ng.com.teddinsight.teddinsight_app.viewmodels.CalendarReportViewModel.ReportItem" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/report_task"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat"
+            android:padding="2dp"
+            android:text="@{@string/task_count(reportitem.getTaskAssigned())}"
+            android:textColor="@color/black"
+            tools:text="Task: " />
+
+        <TextView
+            android:id="@+id/report_for"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat"
+            android:text="@{@string/task_assigned_to(reportitem.getStaffName())}"
+            android:padding="2dp"
+            android:textColor="@color/black"
+            tools:text="Assigned to : " />
+
+        <TextView
+            android:id="@+id/date_completed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat"
+            android:padding="2dp"
+            setDateCompleted="@{reportitem.getDateCompleted()}"
+            android:textColor="@color/green_600"
+            tools:text="Date completed" />
+
+        <TextView
+            android:id="@+id/report_deadline"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat"
+            android:padding="2dp"
+            app:formattedDeadlineDate="@{reportitem.getDeadline()}"
+            android:textColor="@color/red_600"
+            tools:text="Deadline: " />
+
+
+    </LinearLayout>
+</layout>

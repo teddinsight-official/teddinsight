@@ -201,6 +201,15 @@ public class SocialAccountFragment extends Fragment {
             @Override
             public void onResponse(Call<InstagramResponseData> call, Response<InstagramResponseData> response) {
                 InstagramResponseData instagramResponseData = response.body();
+                progressDialog.dismiss();
+                if (instagramResponseData == null) {
+                    snackbar = Snackbar.make(snackbarView, "An error occurred, If you are sure it's not a network error, try adding account again",
+                            Snackbar.LENGTH_INDEFINITE)
+                            .setActionTextColor(ContextCompat.getColor(getActivityCast(), R.color.yellow_900))
+                            .setAction("Dismiss", v -> snackbar.dismiss());
+                    snackbar.show();
+                    return;
+                }
                 InstagramResponseData.InstagramAccountCount instagramAccountCount = instagramResponseData.instagramAccountCount;
                 followerCountTextView.setText(String.valueOf(instagramAccountCount.followersCount));
                 followingCountTextView.setText(String.valueOf(instagramAccountCount.followingCount));
@@ -210,7 +219,6 @@ public class SocialAccountFragment extends Fragment {
                 float percentage = (float) followersGained / socialAccount.getFollowersCountOnRegistration();
                 String percentGrowth = String.valueOf(Math.round(percentage * 100)).concat(" %");
                 growthPercentageTextView.setText(percentGrowth);
-                progressDialog.dismiss();
             }
 
             @Override

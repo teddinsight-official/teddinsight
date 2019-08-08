@@ -1,5 +1,7 @@
 package ng.com.teddinsight.teddinsight_app.models;
 
+import androidx.annotation.Nullable;
+
 import org.parceler.Parcel;
 
 @Parcel(Parcel.Serialization.BEAN)
@@ -76,5 +78,10 @@ public class ClientCalendar {
 
     public void setBeginPublishing(boolean beginPublishing) {
         this.beginPublishing = beginPublishing;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return super.equals(obj);
     }
 }

@@ -12,8 +12,6 @@ import androidx.lifecycle.ViewModel;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -69,6 +67,7 @@ public class ClientCalendarViewModel extends ViewModel {
         clientCalendar.setBeginPublishing(false);
         clientCalendar.setNeedsPublishing(false);
         clientCalendar.setClientId(clientId);
+        clientCalendar.setKey(key);
         clientCalendar.setTaskCount(0);
         reference.child(key).setValue(clientCalendar).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {

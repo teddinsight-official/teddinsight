@@ -233,8 +233,8 @@ public class AppApplication extends Application {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         User userInfo = dataSnapshot.getValue(User.class);
-                        assert userInfo != null;
-                        if (!userInfo.hasAccess) {
+                        //assert userInfo != null;
+                        if (userInfo == null || !userInfo.hasAccess) {
                             FirebaseAuth.getInstance().signOut();
                             Intent i = new Intent(getBaseContext(), LoginActivity.class);
                             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

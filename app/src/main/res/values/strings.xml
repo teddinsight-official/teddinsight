@@ -126,4 +126,5 @@
     <string name="view_calendar_report">View calendar report</string>
     <string name="delete_calendar">Delete calendar</string>
     <string name="dispatch_tasks">Dispatch Tasks</string>
+    <string name="date_completed">Date Completed: %s</string>
 </resources>

@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.BaseActivity"></activity>
+        <activity android:name=".activities.BaseActivity" />
         <activity android:name=".activities.AdminActivity" />
         <activity android:name=".activities.PostScheduleActivity" />
         <activity
@@ -49,13 +49,12 @@
         <service android:name=".services.FileDownloadService" />
         <service
             android:name=".services.MyFirebaseService"
-            android:stopWithTask="false"
-            android:exported="false">
+            android:exported="false"
+            android:stopWithTask="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
 
         <meta-data
             android:name="preloaded_fonts"
@@ -87,9 +86,8 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
-
     </application>
 
 </manifest>

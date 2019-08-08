@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -12,6 +13,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -76,11 +79,18 @@ public class NewTaskViewModel extends ViewModel {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 List<User> users = new ArrayList<>();
                 if (dataSnapshot.getChildrenCount() > 0) {
+                    List<String> ignoreUsers = new ArrayList<>();
+                    ignoreUsers.add(User.USER_ADMIN);
+                    ignoreUsers.add(User.USER_CLIENT);
+                    ignoreUsers.add(User.USER_PARTNER);
+                    ignoreUsers.add(User.USER_HR);
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         User u = snapshot.getValue(User.class);
-                        users.add(u);
+                        if (!ignoreUsers.contains(u.getRole()))
+                            users.add(u);
                     }
                 }
+                Log.e("TAG", "" + users.size());
                 _users.setValue(users);
             }
 
@@ -99,10 +109,14 @@ public class NewTaskViewModel extends ViewModel {
     public void submit(String taskTitle, String taskDescription) {
         Tasks tasks = tasks().getValue();
         //Log.e("TAG", tasks().getValue().getId());
-        if (TextUtils.isEmpty(taskDescription) || TextUtils.isEmpty(taskTitle) || userData == null) {
+        if (TextUtils.isEmpty(taskDescription) || TextUtils.isEmpty(taskTitle)) {
             _message.setValue("Task should have a title and description");
             return;
+        } else if (userData == null) {
+            _message.setValue("Please select one user for this task");
+            return;
         }
+        boolean isNotUpdate = false;
         tasks.taskDescription = taskDescription;
         tasks.taskTitle = taskTitle;
         tasks.setDueDate(dueDate);
@@ -112,11 +126,36 @@ public class NewTaskViewModel extends ViewModel {
         tasks.assignedToId = userData.getId();
         Log.e("TAG", "" + tasks.getId());
         if (tasks.getId() == null) {
+            isNotUpdate = true;
             String key = taskRef.push().getKey();
             tasks.setId(key);
         }
+        if (isNotUpdate) {
+            FirebaseDatabase.getInstance().getReference().child(ClientCalendar.getBaseTableName())
+                    .child(tasks.clientId)
+                    .child(tasks.clientCalendarId)
+                    .runTransaction(new Transaction.Handler() {
+                        @NonNull
+                        @Override
+                        public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                            ClientCalendar clientCalendar = mutableData.getValue(ClientCalendar.class);
+                            if (clientCalendar != null) {
+                                clientCalendar.setTaskCount(clientCalendar.getTaskCount() + 1);
+                                mutableData.setValue(clientCalendar);
+                            }
+                            return Transaction.success(mutableData);
+                        }
+
+                        @Override
+                        public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+
+                        }
+                    });
+        }
+        _message.setValue("Adding task, please wait...");
         taskRef.child(tasks.getId()).setValue(tasks).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
+                _message.setValue("Task was successfully added to calendar.");
                 _taskSaveSuccessful.setValue(true);
             } else
                 _message.setValue("An error occurred while saving task: " + task.getException().getLocalizedMessage());
@@ -133,6 +172,7 @@ public class NewTaskViewModel extends ViewModel {
     }
 
     public void setUserData(User userData) {
+        Log.e("TAG", "userdata set");
         this.userData = userData;
     }
 

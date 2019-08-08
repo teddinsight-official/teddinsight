@@ -63,12 +63,12 @@ public class ClientCalendarAdapter extends ListAdapter<ClientCalendar, ClientCal
 
         @Override
         public boolean areItemsTheSame(@NonNull ClientCalendar oldItem, @NonNull ClientCalendar newItem) {
-            return oldItem == newItem;
+            return oldItem.getKey().equals(newItem.getKey());
         }
 
         @Override
         public boolean areContentsTheSame(@NonNull ClientCalendar oldItem, @NonNull ClientCalendar newItem) {
-            return oldItem.getKey().equals(newItem.getKey());
+            return oldItem.equals(newItem);
         }
     }
 

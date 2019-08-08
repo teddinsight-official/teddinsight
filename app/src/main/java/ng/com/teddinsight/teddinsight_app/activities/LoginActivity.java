@@ -186,9 +186,9 @@ public class LoginActivity extends AppCompatActivity implements EasyPermissions.
         ref.child("/" + User.getTableName() + "/" + uid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.e("TAG", "" + dataSnapshot.getValue());
                 userInfo = dataSnapshot.getValue(User.class);
-                assert userInfo != null;
-                if (!userInfo.hasAccess) {
+                if (userInfo == null || !userInfo.hasAccess) {
                     mAuth.signOut();
                     dialog.dismiss();
                     showRevokedDialog();
@@ -270,17 +270,17 @@ public class LoginActivity extends AppCompatActivity implements EasyPermissions.
     @Override
     protected void onStart() {
         super.onStart();
-        Log.e(TAG,ExtraUtils.getHumanReadableString(System.currentTimeMillis(), false));
+        Log.e(TAG, ExtraUtils.getHumanReadableString(System.currentTimeMillis(), false));
         try {
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String version = pInfo.versionName;
             Log.e("log", version);
-            if (!preferences.contains("has2.2Signed")) {
-                if (version.equalsIgnoreCase("2.2"))
+            if (!preferences.contains("has2.3Signed")) {
+                if (version.equalsIgnoreCase("2.3"))
                     FirebaseAuth.getInstance().signOut();
                 user = FirebaseAuth.getInstance().getCurrentUser();
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putBoolean("has2.2Signed", true);
+                editor.putBoolean("has2.3Signed", true);
                 editor.apply();
             }
         } catch (PackageManager.NameNotFoundException e) {

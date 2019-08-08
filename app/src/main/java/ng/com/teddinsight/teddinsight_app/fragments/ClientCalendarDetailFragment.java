@@ -68,6 +68,9 @@ public class ClientCalendarDetailFragment extends Fragment {
                     case R.id.dispatch_calendar:
                         viewModel.startCalendarDispatch();
                         break;
+                    case R.id.report_menu:
+                        viewModel.startViewCalendarReport();
+                        break;
                 }
             }
             return false;
@@ -109,6 +112,7 @@ public class ClientCalendarDetailFragment extends Fragment {
         });
         viewModel.finishOperation().observe(this, aBoolean -> {
             if (aBoolean) {
+                showToast("Operation done", Toast.LENGTH_LONG);
                 getActivityCast().onBackPressed();
                 viewModel.endFinishOperation();
             }
@@ -121,11 +125,23 @@ public class ClientCalendarDetailFragment extends Fragment {
                 }
                 dialogBuilder.setMessage("Calendar can only be dispatched once, make sure you have added all tasks.")
                         .setPositiveButton("Publish", (dialog, which) -> {
+                            showToast("assigning tasks in calendar, please wait", Toast.LENGTH_LONG);
                             viewModel.dispatchNow(clientCalendar12);
                             dialog.dismiss();
                         });
                 dialogBuilder.show();
                 viewModel.finishClientCalendarDispatch();
+            }
+        });
+        viewModel.viewCalendarReport().observe(this, clientCalendar14 -> {
+            if (clientCalendar14 != null) {
+                if (!clientCalendar14.isBeginPublishing()) {
+                    showToast("Cannot view report of undispatched calendar", Toast.LENGTH_LONG);
+                } else {
+                    showToast("goto report frag", Toast.LENGTH_LONG);
+                }
+                getActivityCast().replaceFragmentContainerContent(CalendarReportFragment.NewInstance(clientCalendar14), true);
+                viewModel.stopViewCalendarReport();
             }
         });
         return binding.getRoot();

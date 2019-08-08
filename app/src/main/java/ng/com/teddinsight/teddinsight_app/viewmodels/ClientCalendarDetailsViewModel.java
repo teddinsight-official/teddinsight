@@ -45,7 +45,12 @@ public class ClientCalendarDetailsViewModel extends ViewModel {
     private MutableLiveData<Tasks> _creatNewTask = new MutableLiveData<>();
     private MutableLiveData<ClientCalendar> _deleteClientCalendar = new MutableLiveData<>();
     private MutableLiveData<ClientCalendar> _dispatchClientCalendar = new MutableLiveData<>();
+    private MutableLiveData<ClientCalendar> _viewCalendarReport = new MutableLiveData<>();
     private MutableLiveData<Boolean> _finishOperation = new MutableLiveData<>();
+
+    public LiveData<ClientCalendar> viewCalendarReport() {
+        return _viewCalendarReport;
+    }
 
     public LiveData<Boolean> finishOperation() {
         return _finishOperation;
@@ -227,5 +232,13 @@ public class ClientCalendarDetailsViewModel extends ViewModel {
                         _message.setValue(clientCalendar12.getName().concat(" dispatched successfully"));
                     }
                 });
+    }
+
+    public void startViewCalendarReport() {
+        _viewCalendarReport.setValue(_clientCalendar.getValue());
+    }
+
+    public void stopViewCalendarReport() {
+        _viewCalendarReport.setValue(null);
     }
 }

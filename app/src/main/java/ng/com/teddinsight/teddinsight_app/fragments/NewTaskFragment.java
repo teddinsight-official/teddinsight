@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,7 +64,6 @@ public class NewTaskFragment extends Fragment {
         viewModel.users().observe(this, users -> {
             CustomSpinnerAdapter spinnerAdapter = new CustomSpinnerAdapter(users);
             binding.user.setAdapter(spinnerAdapter);
-            binding.user.setSelection(0, true);
             binding.user.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -75,7 +75,17 @@ public class NewTaskFragment extends Fragment {
 
                 }
             });
+            if (tasks.assignedToId == null || TextUtils.isEmpty(tasks.assignedToId))
+                binding.user.setSelection(0, true);
+            else {
+                for (User user : users) {
+                    if (user.getId().equals(tasks.assignedToId)) {
+                        binding.user.setSelection(users.indexOf(user), true);
+                    }
+                }
+            }
         });
+
         viewModel.shouldRequestNewDeadline().observe(this, aBoolean -> {
             if (aBoolean) {
                 Calendar calendar = Calendar.getInstance();
