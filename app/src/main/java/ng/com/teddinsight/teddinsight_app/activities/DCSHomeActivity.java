@@ -150,7 +150,7 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
                 if (currentFragment.equals(FRAGMENT_TASK))
                     return false;
                 currentFragment = FRAGMENT_TASK;
-                replaceFragmentContainerContent(TaskFragment.NewInstance(), false);
+                replaceFragmentContainerContent(TaskFragment.NewInstance(role), false);
                 return true;
             case R.id.navigation_notifications:
                 if (currentFragment.equals(FRAGMENT_CONVERSATION))
@@ -174,6 +174,10 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
         }
         return false;
     };
+
+    public void showHomeFrag() {
+        navigation.findViewById(R.id.navigation_home).performClick();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

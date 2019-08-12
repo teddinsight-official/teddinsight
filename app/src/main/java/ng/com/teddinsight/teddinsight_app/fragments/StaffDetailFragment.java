@@ -377,7 +377,8 @@ public class StaffDetailFragment extends Fragment implements View.OnClickListene
     private void sendTask(Tasks tasks) {
         showToast("Sending Task");
         Random rando = new Random();
-        tasks.pendingIntentId = rando.nextInt(100) + 1;
+        tasks.pendingIntentId = rando.nextInt(1000) + 1;
+        tasks.assignedOn = System.currentTimeMillis();
         String key = taskRef.child(user.id).push().getKey();
         taskRef.child(user.id).child(key).setValue(tasks.toMap()).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {

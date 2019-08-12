@@ -6,8 +6,10 @@ import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,21 +32,25 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import ng.com.teddinsight.teddinsight_app.R;
+import ng.com.teddinsight.teddinsight_app.activities.DCSHomeActivity;
 import ng.com.teddinsight.teddinsight_app.models.Tasks;
 import ng.com.teddinsight.teddinsight_app.receivers.ReminderReceiver;
 import ng.com.teddinsight.teddinsight_app.utils.ExtraUtils;
+import ng.com.teddinsight.teddinsightchat.models.User;
 
+import static android.view.View.GONE;
+import static ng.com.teddinsight.teddinsight_app.fragments.TaskFragment.ROLE;
 import static ng.com.teddinsight.teddinsight_app.fragments.TextEditorDialogFragment.TAG;
 import static ng.com.teddinsight.teddinsight_app.models.Tasks.TASK_COMPLETE;
 
 public class TaskDialog extends DialogFragment {
 
-    @BindView(R.id.status)
-    TextView statusView;
+    public static final String TASK_TO_PERFORM = "task_to_perform_id";
     @BindView(R.id.desc)
     TextView descriptionView;
     @BindView(R.id.assigned_by)
@@ -59,15 +65,22 @@ public class TaskDialog extends DialogFragment {
     TextView daysLeft;
     @BindView(R.id.mark_done)
     Button markAsDoneButton;
+    @BindView(R.id.title)
+    TextView taskTitle;
+    @BindView(R.id.perform_task_now)
+    Button performTaskNow;
+
     Tasks tasks;
     public static final String REMINDER_INTENT_TASK_ID = "task_id";
     private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     private DatabaseReference taskRef = FirebaseDatabase.getInstance().getReference().child(Tasks.getTableName()).child(user.getUid());
     private Context mContext;
+    private String role;
 
-    public static TaskDialog NewInstance(Tasks tasks) {
+    public static TaskDialog NewInstance(Tasks tasks, String role) {
         Bundle b = new Bundle();
         b.putParcelable("tasks", tasks);
+        b.putString(ROLE, role);
         TaskDialog taskDialog = new TaskDialog();
         taskDialog.setArguments(b);
         return taskDialog;
@@ -87,6 +100,7 @@ public class TaskDialog extends DialogFragment {
         ButterKnife.bind(this, view);
         Bundle dd = getArguments();
         tasks = dd.getParcelable("tasks");
+        role = dd.getString(ROLE, User.USER_ADMIN);
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_close_white_24dp);
         toolbar.setNavigationOnClickListener(v -> getDialog().dismiss());
@@ -110,22 +124,39 @@ public class TaskDialog extends DialogFragment {
     }
 
     private void initialize() {
-        statusView.setText(ExtraUtils.getStatText(tasks.status));
-        assignedOn.setText(ExtraUtils.getHumanReadableString(tasks.getAssignedOn()));
+        assignedOn.setText(getContext().getString(R.string.assign_on, ExtraUtils.getHumanReadableString(tasks.getAssignedOn())));
         assignedByView.setText(tasks.assignedBy);
         descriptionView.setText(tasks.getTaskDescription());
-        dueDate.setText(ExtraUtils.getHumanReadableString(tasks.getDueDate()));
+        taskTitle.setText(tasks.getTaskTitle());
+        dueDate.setText(getContext().getString(R.string.deadline, ExtraUtils.getHumanReadableString(tasks.getDueDate())));
         stat.setBackgroundColor(ExtraUtils.getColor(tasks.status));
         if (tasks.status == 1) {
-            markAsDoneButton.setVisibility(View.GONE);
+            markAsDoneButton.setVisibility(GONE);
+        }
+        if (!(role.equals(User.USER_CONTENT) || role.equals(User.USER_DESIGNER)) || tasks.getStatus() == TASK_COMPLETE) {
+            performTaskNow.setVisibility(GONE);
         }
         org.joda.time.DateTime n = new DateTime();
         n.withMillis(tasks.getDueDate() * 1000);
         DateTime f = new DateTime();
         f.withMillis(System.currentTimeMillis());
         Days d = Days.daysBetween(n, f);
-        daysLeft.setText("" + d.getDays());
+        daysLeft.setText("Days left to deadline: " + d.getDays());
         setReminder();
+    }
+
+    @OnClick(R.id.perform_task_now)
+    public void setPerformTaskNow() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(TASK_TO_PERFORM, tasks.getId());
+        editor.apply();
+        getDialog().cancel();
+        getActivityCast().showHomeFrag();
+    }
+
+    private DCSHomeActivity getActivityCast() {
+        return (DCSHomeActivity) getActivity();
     }
 
     @OnClick(R.id.mark_done)
@@ -137,8 +168,7 @@ public class TaskDialog extends DialogFragment {
         taskRef.child(tasks.id).child("status").setValue(TASK_COMPLETE).addOnCompleteListener(task -> {
             progressDialog.cancel();
             if (task.isSuccessful()) {
-                markAsDoneButton.setVisibility(View.GONE);
-                statusView.setText(ExtraUtils.getStatText(0));
+                markAsDoneButton.setVisibility(GONE);
                 stat.setBackgroundColor(ExtraUtils.getColor(0));
             } else {
                 Toast.makeText(mContext, "An Error Occurred, Try Again", Toast.LENGTH_LONG).show();

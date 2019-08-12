@@ -2,6 +2,7 @@
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <variable
             name="viewmodel"
             type="ng.com.teddinsight.teddinsight_app.viewmodels.NewTaskViewModel" />
@@ -54,7 +55,6 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <EditText
-                android:textSize="12sp"
                 android:id="@+id/task_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -67,17 +67,18 @@
                 android:lines="10"
                 android:padding="2dp"
                 android:text="@{viewmodel.tasks().taskDescription}"
+                android:textSize="12sp"
                 app:layout_constraintTop_toBottomOf="@id/task_title_wrapper" />
 
             <TextView
-                android:textStyle="bold"
-                android:textSize="16sp"
                 android:id="@+id/task_for"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:fontFamily="@font/montserrat"
                 android:text="@string/task_for"
+                android:textSize="16sp"
+                android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/task_description" />
 
@@ -99,19 +100,18 @@
                     android:id="@+id/deadline"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:textColor="@color/white"
-                    android:textColorHint="@color/white"
                     android:background="@drawable/rect_blue"
                     android:fontFamily="@font/montserrat"
                     android:hint="@string/deadline"
                     android:onClick="@{() -> viewmodel.setDeadline()}"
                     android:padding="12dp"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white"
                     app:formattedDeadlineDate="@{viewmodel.tasks().dueDate}" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
-                android:onClick="@{() -> viewmodel.submit(taskTitle.getText().toString(), taskDescription.getText().toString())}"
                 android:id="@+id/submit_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -120,8 +120,9 @@
                 android:layout_marginEnd="8dp"
                 android:background="@color/green_600"
                 android:fontFamily="@font/montserrat"
+                android:onClick="@{() -> viewmodel.submit(taskTitle.getText().toString(), taskDescription.getText().toString())}"
                 android:padding="8dp"
-                android:text="@string/save_task_to_calendar"
+                app:setButtonText="@{viewmodel.tasks()}"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textSize="16sp"

@@ -87,6 +87,7 @@
                 tools:text="@string/deadline" />
 
             <TextView
+                app:setTaskDrawable="@{task.status}"
                 android:id="@+id/circle"
                 android:layout_width="15dp"
                 android:layout_height="15dp"

@@ -1,16 +1,21 @@
 package ng.com.teddinsight.teddinsight_app.adapter;
 
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.databinding.BindingAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import ng.com.teddinsight.teddinsight_app.databinding.ClientTaskItemBinding;
 import ng.com.teddinsight.teddinsight_app.models.Tasks;
+
+import static ng.com.teddinsight.teddinsight_app.utils.ExtraUtils.getColor;
 
 public class ClientCalendarTaskAdapter extends ListAdapter<Tasks, ClientCalendarTaskAdapter.ClientCalendarTaskViewHolder> {
 
@@ -52,6 +57,13 @@ public class ClientCalendarTaskAdapter extends ListAdapter<Tasks, ClientCalendar
             binding.executePendingBindings();
         }
 
+    }
+
+    @BindingAdapter("setTaskDrawable")
+    public static void setTaskDrawable(TextView textView, int status) {
+        GradientDrawable magnitudeCircle = (GradientDrawable) textView.getBackground();
+        int magnitudeColor = getColor(status);
+        magnitudeCircle.setColor(magnitudeColor);
     }
 
     public static class ClientCalendarTaskDiffUtil extends DiffUtil.ItemCallback<Tasks> {

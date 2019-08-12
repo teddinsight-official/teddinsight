@@ -32,6 +32,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ng.com.teddinsight.teddinsight_app.R;
@@ -39,6 +40,7 @@ import ng.com.teddinsight.teddinsight_app.listeners.Listeners;
 import ng.com.teddinsight.teddinsight_app.models.Notifications;
 import ng.com.teddinsight.teddinsight_app.models.Tasks;
 import ng.com.teddinsight.teddinsight_app.utils.ExtraUtils;
+import ng.com.teddinsight.teddinsightchat.models.User;
 
 import static ng.com.teddinsight.teddinsight_app.utils.ExtraUtils.getColor;
 
@@ -57,11 +59,18 @@ public class TaskFragment extends Fragment implements Listeners.TaskItemClicked 
     FirebaseUser firebaseUser;
     private Context mContext;
 
-    public static Fragment NewInstance() {
-        return new TaskFragment();
+    public static final String ROLE = "role";
+
+    public static Fragment NewInstance(String role) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ROLE, role);
+        TaskFragment taskFragment = new TaskFragment();
+        taskFragment.setArguments(bundle);
+        return taskFragment;
     }
 
     View v;
+    private String role;
 
     @Nullable
     @Override
@@ -72,6 +81,7 @@ public class TaskFragment extends Fragment implements Listeners.TaskItemClicked 
         refreshLayout.setColorSchemeColors(Color.RED, Color.BLUE, Color.GREEN, Color.CYAN);
         refreshLayout.setOnRefreshListener(this::fetchTasks);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        role = getArguments().getString(ROLE, User.USER_ADMIN);
         assert firebaseUser != null;
         if (firebaseUser.getEmail().startsWith("content")) {
             isDesigner = false;
@@ -137,7 +147,7 @@ public class TaskFragment extends Fragment implements Listeners.TaskItemClicked 
         if (prev != null) {
             ft.remove(prev);
         }
-        TaskDialog.NewInstance(tasks).show(ft, "task");
+        TaskDialog.NewInstance(tasks, role).show(ft, "task");
 
     }
 

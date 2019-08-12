@@ -127,4 +127,6 @@
     <string name="delete_calendar">Delete calendar</string>
     <string name="dispatch_tasks">Dispatch Tasks</string>
     <string name="date_completed">Date Completed: %s</string>
+    <string name="assign_on">Assigned On %s</string>
+    <string name="tap_here_to_perform_task_now">Tap here to perform task now</string>
 </resources>

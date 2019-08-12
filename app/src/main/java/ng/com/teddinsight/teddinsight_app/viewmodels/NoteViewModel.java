@@ -1,6 +1,8 @@
 package ng.com.teddinsight.teddinsight_app.viewmodels;
 
 import android.app.Application;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
@@ -8,10 +10,13 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import ng.com.teddinsight.teddinsight_app.fragments.TaskDialog;
 import ng.com.teddinsight.teddinsight_app.models.ContentNotes;
+import ng.com.teddinsight.teddinsight_app.models.Tasks;
 
 public class NoteViewModel extends AndroidViewModel {
     private MutableLiveData<ContentNotes> _contentNotes = new MutableLiveData<>();
@@ -19,6 +24,9 @@ public class NoteViewModel extends AndroidViewModel {
     private MutableLiveData<Boolean> _operationDeleteOrDisapproveRequested = new MutableLiveData<>();
     private MutableLiveData<Boolean> _operationSaveOrApprove = new MutableLiveData<>();
     private MutableLiveData<String> _onError = new MutableLiveData<>();
+    private SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplication().getApplicationContext());
+    private SharedPreferences.Editor editor;
+    private String uid = FirebaseAuth.getInstance().getUid();
 
     public LiveData<String> onError() {
         return _onError;
@@ -104,11 +112,30 @@ public class NoteViewModel extends AndroidViewModel {
         reference.child(contentNotes.getKey()).setValue(contentNotes).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 _onSuccess.setValue(s);
+                if (preferences.contains(TaskDialog.TASK_TO_PERFORM)) {
+                    String taskId = preferences.getString(TaskDialog.TASK_TO_PERFORM, "......");
+                    FirebaseDatabase.getInstance().getReference().child(Tasks.getTableName()).child(uid).child(taskId).child("status").setValue(1);
+                    clearTaskToPerform();
+                }
             } else {
                 _onError.setValue(task.getException().getLocalizedMessage());
             }
         });
 
+    }
+
+    private void clearTaskToPerform() {
+        if (preferences.contains(TaskDialog.TASK_TO_PERFORM)) {
+            editor = preferences.edit();
+            editor.remove(TaskDialog.TASK_TO_PERFORM);
+            editor.apply();
+        }
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        clearTaskToPerform();
     }
 
     public void approveNote() {

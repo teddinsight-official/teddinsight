@@ -27,12 +27,15 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.parceler.Parcels;
+
 import java.sql.Array;
 import java.util.Calendar;
 import java.util.List;
 
 import ng.com.teddinsight.teddinsight_app.R;
 import ng.com.teddinsight.teddinsight_app.databinding.FragmentNewTaskBinding;
+import ng.com.teddinsight.teddinsight_app.models.ClientCalendar;
 import ng.com.teddinsight.teddinsight_app.models.Tasks;
 import ng.com.teddinsight.teddinsight_app.viewmodels.NewTaskViewModel;
 import ng.com.teddinsight.teddinsight_app.viewmodels.NewTaskViewModelFactory;
@@ -41,10 +44,12 @@ import ng.com.teddinsight.teddinsightchat.models.User;
 public class NewTaskFragment extends Fragment {
 
     private static final String TASK_ITEM = "task_item";
+    private static final String CLIENT_CALENDAR = "client_calendar";
 
-    public static NewTaskFragment NewInstance(Tasks tasks) {
+    public static NewTaskFragment NewInstance(Tasks tasks, ClientCalendar clientCalendar) {
         Bundle bundle = new Bundle();
         bundle.putParcelable(TASK_ITEM, tasks);
+        bundle.putParcelable(CLIENT_CALENDAR, Parcels.wrap(clientCalendar));
         NewTaskFragment newTaskFragment = new NewTaskFragment();
         newTaskFragment.setArguments(bundle);
         return newTaskFragment;
@@ -56,11 +61,15 @@ public class NewTaskFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment\
         Tasks tasks = (Tasks) getArguments().getParcelable(TASK_ITEM);
+        ClientCalendar clientCalendar = Parcels.unwrap(getArguments().getParcelable(CLIENT_CALENDAR));
         FragmentNewTaskBinding binding = FragmentNewTaskBinding.inflate(LayoutInflater.from(container.getContext()), container, false);
-        NewTaskViewModelFactory factory = new NewTaskViewModelFactory(tasks);
+        NewTaskViewModelFactory factory = new NewTaskViewModelFactory(tasks, clientCalendar);
         NewTaskViewModel viewModel = ViewModelProviders.of(this, factory).get(NewTaskViewModel.class);
         binding.setViewmodel(viewModel);
         binding.setLifecycleOwner(this);
+        if (clientCalendar.isBeginPublishing()){
+            binding.user.setEnabled(false);
+        }
         viewModel.users().observe(this, users -> {
             CustomSpinnerAdapter spinnerAdapter = new CustomSpinnerAdapter(users);
             binding.user.setAdapter(spinnerAdapter);

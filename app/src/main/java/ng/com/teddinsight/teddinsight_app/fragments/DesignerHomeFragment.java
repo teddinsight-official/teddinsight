@@ -45,6 +45,8 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -81,6 +83,7 @@ import io.reactivex.schedulers.Schedulers;
 import ng.com.teddinsight.teddinsight_app.R;
 import ng.com.teddinsight.teddinsight_app.listeners.Listeners;
 import ng.com.teddinsight.teddinsight_app.models.DesignerDesigns;
+import ng.com.teddinsight.teddinsight_app.models.Tasks;
 import ng.com.teddinsight.teddinsight_app.utils.ExtraUtils;
 import ng.com.teddinsight.teddinsight_app.listeners.Listeners.DesignTemplateClicked;
 import ng.com.teddinsight.teddinsightchat.models.User;
@@ -133,6 +136,9 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
     Listeners.ShowEditImageActivity showEditImageActivity;
     private Context mContext;
     private ProgressDialog progressDialog;
+    private static String userId = FirebaseAuth.getInstance().getUid();
+    private static DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+    private static String taskId = null;
 
 
     @Nullable
@@ -148,6 +154,9 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
         super.onViewCreated(view, savedInstanceState);
         requestCameraPermission();
         preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        if (preferences.contains(TaskDialog.TASK_TO_PERFORM)) {
+            taskId = preferences.getString(TaskDialog.TASK_TO_PERFORM, "");
+        }
         refreshLayout.setRefreshing(true);
         refreshLayout.setColorSchemeColors(Color.RED, Color.BLUE, Color.GREEN, Color.CYAN);
         refreshLayout.setOnRefreshListener(this::getDesigns);
@@ -325,6 +334,12 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
             dialog.cancel();
             if (task.isSuccessful()) {
                 Toast.makeText(context, "Design Uploaded Successfully", Toast.LENGTH_LONG).show();
+                if (taskId != null) {
+                    rootRef.child(Tasks.getTableName()).child(userId).child(taskId).child("status").setValue(1);
+                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+                    editor.remove(TaskDialog.TASK_TO_PERFORM);
+                    editor.apply();
+                }
             } else {
                 Toast.makeText(context, "An Error Occurred, Please Try again", Toast.LENGTH_LONG).show();
             }
@@ -435,6 +450,20 @@ public class DesignerHomeFragment extends Fragment implements EasyPermissions.Pe
         super.onAttach(context);
         showEditImageActivity = (Listeners.ShowEditImageActivity) context;
         this.mContext = context;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        clearTaskToPerform();
+    }
+
+    private void clearTaskToPerform() {
+        if (preferences.contains(TaskDialog.TASK_TO_PERFORM)) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.remove(TaskDialog.TASK_TO_PERFORM);
+            editor.apply();
+        }
     }
 
     public class DesignerAdapter extends RecyclerView.Adapter<DesignerAdapter.DesignViewHolder> {

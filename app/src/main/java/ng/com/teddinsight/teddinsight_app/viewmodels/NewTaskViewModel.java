@@ -2,9 +2,13 @@ package ng.com.teddinsight.teddinsight_app.viewmodels;
 
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.BindingAdapter;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -19,6 +23,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import ng.com.teddinsight.teddinsight_app.models.ClientCalendar;
 import ng.com.teddinsight.teddinsight_app.models.Tasks;
@@ -31,8 +36,13 @@ public class NewTaskViewModel extends ViewModel {
     private DatabaseReference taskRef;
     private MutableLiveData<String> _message = new MutableLiveData<>();
     private MutableLiveData<Boolean> _taskSaveSuccessful = new MutableLiveData<>();
+    private MutableLiveData<ClientCalendar> _clientCalendar = new MutableLiveData<>();
     private User userData;
     private long dueDate = System.currentTimeMillis();
+
+    public LiveData<ClientCalendar> calendarLiveData() {
+        return _clientCalendar;
+    }
 
     public LiveData<Boolean> taskSaveSuccessful() {
         return _taskSaveSuccessful;
@@ -65,7 +75,7 @@ public class NewTaskViewModel extends ViewModel {
         this.dueDate = dueDate;
     }
 
-    public NewTaskViewModel(Tasks tasks) {
+    public NewTaskViewModel(Tasks tasks, ClientCalendar clientCalendar) {
         _tasks.setValue(tasks);
         _message.setValue(null);
         taskRef = FirebaseDatabase.getInstance()
@@ -102,6 +112,12 @@ public class NewTaskViewModel extends ViewModel {
 
     }
 
+    @BindingAdapter("setButtonText")
+    public static void setButtonText(Button buttonText, Tasks tasks) {
+        buttonText.setText(tasks.getId() == null ? "Add Task to Calendar" : "Update task info");
+        buttonText.setVisibility(tasks.getStatus() == Tasks.TASK_COMPLETE ? View.GONE : View.VISIBLE);
+    }
+
     public void setDeadline() {
         _shouldRequestNewDeadline.setValue(true);
     }
@@ -124,9 +140,12 @@ public class NewTaskViewModel extends ViewModel {
         tasks.assignedToRole = userData.getRole();
         tasks.assignedTo = userData.getFirstName().concat(" ").concat(userData.getLastName());
         tasks.assignedToId = userData.getId();
+        Random rando = new Random();
+        tasks.pendingIntentId = rando.nextInt(1000) + 1;
         Log.e("TAG", "" + tasks.getId());
         if (tasks.getId() == null) {
             isNotUpdate = true;
+            tasks.assignedOn = System.currentTimeMillis();
             String key = taskRef.push().getKey();
             tasks.setId(key);
         }

@@ -25,6 +25,7 @@ import ng.com.teddinsight.teddinsight_app.viewmodels.ClientCalendarDetailsViewMo
 public class ClientCalendarDetailFragment extends Fragment {
 
     public static final String CLIENT_CALENDAR_ITEM = "client_calendar_item";
+    private ClientCalendar clientCalendar;
 
     public ClientCalendarDetailFragment() {
         // Required empty public constructor
@@ -43,7 +44,7 @@ public class ClientCalendarDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         FragmentClientCalendarDetailBinding binding = FragmentClientCalendarDetailBinding.inflate(inflater, container, false);
         Bundle bundle = getArguments();
-        ClientCalendar clientCalendar = Parcels.unwrap(bundle.getParcelable(CLIENT_CALENDAR_ITEM));
+        clientCalendar = Parcels.unwrap(bundle.getParcelable(CLIENT_CALENDAR_ITEM));
         binding.toolbar.setTitle(clientCalendar.getName());
         binding.setLifecycleOwner(this);
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
@@ -55,7 +56,7 @@ public class ClientCalendarDetailFragment extends Fragment {
         ClientCalendarDetailsViewModel viewModel = ViewModelProviders.of(this, clientCalendarDetailsViewModelFactory).get(ClientCalendarDetailsViewModel.class);
         binding.setViewmodel(viewModel);
         ClientCalendarTaskAdapter adapter = new ClientCalendarTaskAdapter(new ClientCalendarTaskDiffUtil(), tasks -> {
-            getActivityCast().replaceFragmentContainerContent(NewTaskFragment.NewInstance(tasks), true);
+            getActivityCast().replaceFragmentContainerContent(NewTaskFragment.NewInstance(tasks, clientCalendar), true);
         });
         binding.tasksRecyclerView.setAdapter(adapter);
         binding.toolbar.inflateMenu(R.menu.client_calendar_menu);
@@ -76,10 +77,13 @@ public class ClientCalendarDetailFragment extends Fragment {
             return false;
         });
         viewModel.getClientCalendar().observe(this, clientCalendar13 -> {
-            if (clientCalendar13 != null && clientCalendar13.isBeginPublishing())
-                binding.toolbar.getMenu().getItem(0).setVisible(false);
-            else
-                binding.toolbar.getMenu().getItem(0).setVisible(true);
+            if (clientCalendar13 != null) {
+                this.clientCalendar = clientCalendar13;
+                if (clientCalendar13.isBeginPublishing())
+                    binding.toolbar.getMenu().getItem(0).setVisible(false);
+                else
+                    binding.toolbar.getMenu().getItem(0).setVisible(true);
+            }
         });
         viewModel.message().observe(this, s -> {
             if (s != null) {
@@ -92,7 +96,7 @@ public class ClientCalendarDetailFragment extends Fragment {
             if (tasks != null) {
                 tasks.clientCalendarId = clientCalendar.getKey();
                 tasks.clientId = clientCalendar.getClientId();
-                getActivityCast().replaceFragmentContainerContent(NewTaskFragment.NewInstance(tasks), true);
+                getActivityCast().replaceFragmentContainerContent(NewTaskFragment.NewInstance(tasks, clientCalendar), true);
                 viewModel.stopCreateNewTask();
             }
         });
@@ -138,9 +142,9 @@ public class ClientCalendarDetailFragment extends Fragment {
                 if (!clientCalendar14.isBeginPublishing()) {
                     showToast("Cannot view report of undispatched calendar", Toast.LENGTH_LONG);
                 } else {
-                    showToast("goto report frag", Toast.LENGTH_LONG);
+                    showToast("Please wait!!!", Toast.LENGTH_LONG);
+                    getActivityCast().replaceFragmentContainerContent(CalendarReportFragment.NewInstance(clientCalendar14), true);
                 }
-                getActivityCast().replaceFragmentContainerContent(CalendarReportFragment.NewInstance(clientCalendar14), true);
                 viewModel.stopViewCalendarReport();
             }
         });
