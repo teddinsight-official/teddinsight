@@ -271,21 +271,21 @@ public class LoginActivity extends AppCompatActivity implements EasyPermissions.
     protected void onStart() {
         super.onStart();
         Log.e(TAG, ExtraUtils.getHumanReadableString(System.currentTimeMillis(), false));
-        try {
-            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            String version = pInfo.versionName;
-            Log.e("log", version);
-            if (!preferences.contains("has2.3Signed")) {
-                if (version.equalsIgnoreCase("2.3"))
-                    FirebaseAuth.getInstance().signOut();
-                user = FirebaseAuth.getInstance().getCurrentUser();
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putBoolean("has2.3Signed", true);
-                editor.apply();
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+//            String version = pInfo.versionName;
+//            Log.e("log", version);
+//            if (!preferences.contains("has2.3Signed")) {
+//                if (version.equalsIgnoreCase("2.3"))
+//                    FirebaseAuth.getInstance().signOut();
+//                user = FirebaseAuth.getInstance().getCurrentUser();
+//                SharedPreferences.Editor editor = preferences.edit();
+//                editor.putBoolean("has2.3Signed", true);
+//                editor.apply();
+//            }
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             if (preferences.contains("role")) {
                 String role = preferences.getString("role", "");
