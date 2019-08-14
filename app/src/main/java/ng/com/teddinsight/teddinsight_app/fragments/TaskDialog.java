@@ -147,16 +147,26 @@ public class TaskDialog extends DialogFragment {
 
     @OnClick(R.id.perform_task_now)
     public void setPerformTaskNow() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(TASK_TO_PERFORM, tasks.getId());
-        editor.apply();
-        getDialog().cancel();
-        getActivityCast().showHomeFrag();
+        if (getActivityCast() != null) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(TASK_TO_PERFORM, tasks.getId());
+            editor.apply();
+            getDialog().cancel();
+            getActivityCast().showHomeFrag();
+        } else {
+            Toast.makeText(mContext, "This option is not available", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private DCSHomeActivity getActivityCast() {
-        return (DCSHomeActivity) getActivity();
+        DCSHomeActivity dcsHomeActivity;
+        try {
+            dcsHomeActivity = (DCSHomeActivity) getActivity();
+        } catch (Exception e) {
+            dcsHomeActivity = null;
+        }
+        return dcsHomeActivity;
     }
 
     @OnClick(R.id.mark_done)

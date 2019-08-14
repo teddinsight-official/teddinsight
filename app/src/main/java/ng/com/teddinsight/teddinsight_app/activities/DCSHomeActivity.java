@@ -375,7 +375,6 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
                 if (notifications != null) {
                     if (notifications.newTaskReceived && !currentFragment.equals(FRAGMENT_TASK)) {
                         notificationBadge.setVisibility(View.VISIBLE);
-                        ng.com.teddinsight.teddinsight_app.utils.ExtraUtils.playSound(getApplication());
                         Toast.makeText(DCSHomeActivity.this, "You have new tasks", Toast.LENGTH_LONG).show();
                     } else {
                         notificationBadge.setVisibility(View.INVISIBLE);
@@ -383,7 +382,6 @@ public class DCSHomeActivity extends AppCompatActivity implements Listeners.Show
                     long count = notifications.count;
                     if (count > 0 && !currentFragment.equals(FRAGMENT_CONVERSATION)) {
                         notificationBadge1.setVisibility(View.VISIBLE);
-                        ng.com.teddinsight.teddinsight_app.utils.ExtraUtils.playSound(getApplication());
                         Toast.makeText(DCSHomeActivity.this, "You have unread messages", Toast.LENGTH_LONG).show();
                     } else {
                         notificationBadge1.setVisibility(View.INVISIBLE);

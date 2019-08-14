@@ -152,6 +152,7 @@ public class Tasks implements Parcelable {
         res.put("assignedOn", ServerValue.TIMESTAMP);
         res.put("dueDate", this.dueDate);
         res.put("status", TASK_INCOMPLETE);
+        res.put("pendingIntentId", pendingIntentId);
         return res;
     }
 

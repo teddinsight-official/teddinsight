@@ -25,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
@@ -138,6 +139,13 @@ public class AppApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        if (!FirebaseApp.getApps(getApplicationContext()).isEmpty()) {
+            try {
+                FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+            } catch (DatabaseException e) {
+                Log.e(TAG, "" + e.getLocalizedMessage());
+            }
+        }
         Fabric.with(this, new Crashlytics());
         Twitter.initialize(this);
         StateSaver.setEnabledForAllActivitiesAndSupportFragments(this, true);
@@ -189,10 +197,6 @@ public class AppApplication extends Application {
     private void doInstantationInBackground() {
         AppExecutors.getInstance().diskIO().execute(() -> {
             PRDownloader.initialize(getApplicationContext());
-            if (!FirebaseApp.getApps(getApplicationContext()).isEmpty()) {
-                FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-            }
-
             Picasso.Builder builder = new Picasso.Builder(getApplicationContext());
             builder.downloader(new OkHttp3Downloader(getApplicationContext(), Integer.MAX_VALUE));
             Picasso built = builder.build();

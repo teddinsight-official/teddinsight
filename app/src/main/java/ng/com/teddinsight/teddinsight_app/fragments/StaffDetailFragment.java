@@ -383,9 +383,9 @@ public class StaffDetailFragment extends Fragment implements View.OnClickListene
         taskRef.child(user.id).child(key).setValue(tasks.toMap()).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 showToast("Task sent");
-                notifRef.child(user.id).child("newTaskReceived").setValue(true).addOnCompleteListener(task1 -> {
-
-                });
+//                notifRef.child(user.id).child("newTaskReceived").setValue(true).addOnCompleteListener(task1 -> {
+//
+//                });
             } else
                 showToast("an error occurred while sending task, try again");
         });

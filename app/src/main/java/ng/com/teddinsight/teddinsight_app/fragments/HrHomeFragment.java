@@ -73,6 +73,8 @@ public class HrHomeFragment extends Fragment {
     ShimmerFrameLayout shimmerFrameLayout;
     @BindView(R.id.hr_root_view)
     View hrRootVIew;
+    @BindView(R.id.task_notif)
+    TextView taskNotif;
 
     private Listeners.UserItemClickListener userItemClickListener;
     private SharedPreferences preferences;
@@ -157,14 +159,18 @@ public class HrHomeFragment extends Fragment {
                 Log.e(LOG_TAG, "new notification");
                 Notifications notifications = dataSnapshot.getValue(Notifications.class);
                 if (notifications != null) {
+                    if (notifications.newTaskReceived) {
+                        taskNotif.setVisibility(View.VISIBLE);
+                        Toast.makeText(mContext, "You have new tasks", Toast.LENGTH_LONG).show();
+                    } else {
+                        taskNotif.setVisibility(View.INVISIBLE);
+                    }
                     int count = notifications.count;
                     if (count > 0) {
                         String countText = count > 99 ? "9+" : String.valueOf(count);
                         notifTextView.setText(countText);
                         notifTextView.setVisibility(View.VISIBLE);
                         Toast.makeText(mContext, "You have unread messages", Toast.LENGTH_LONG).show();
-                        if (getActivity() != null)
-                            ExtraUtils.playSound(getActivity().getApplication());
                     } else {
                         notifTextView.setVisibility(View.INVISIBLE);
                     }

@@ -125,15 +125,15 @@ public class ClientCalendarDetailFragment extends Fragment {
             if (clientCalendar12 != null) {
                 if (clientCalendar12.getTaskCount() < 1) {
                     showToast("Calendar has no task, can't publish", Toast.LENGTH_LONG);
-                    return;
+                } else {
+                    dialogBuilder.setMessage("Calendar can only be dispatched once, make sure you have added all tasks.")
+                            .setPositiveButton("Publish", (dialog, which) -> {
+                                showToast("assigning tasks in calendar, please wait", Toast.LENGTH_LONG);
+                                viewModel.dispatchNow(clientCalendar12);
+                                dialog.dismiss();
+                            });
+                    dialogBuilder.show();
                 }
-                dialogBuilder.setMessage("Calendar can only be dispatched once, make sure you have added all tasks.")
-                        .setPositiveButton("Publish", (dialog, which) -> {
-                            showToast("assigning tasks in calendar, please wait", Toast.LENGTH_LONG);
-                            viewModel.dispatchNow(clientCalendar12);
-                            dialog.dismiss();
-                        });
-                dialogBuilder.show();
                 viewModel.finishClientCalendarDispatch();
             }
         });

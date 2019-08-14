@@ -27,6 +27,7 @@ import com.google.firebase.database.ValueEventListener;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+
 import ng.com.teddinsight.teddinsight_app.R;
 import ng.com.teddinsight.teddinsight_app.fragments.TaskDialog;
 import ng.com.teddinsight.teddinsight_app.models.Tasks;
@@ -55,8 +56,7 @@ public class ReminderReceiver extends BroadcastReceiver {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Tasks tasks = dataSnapshot.getValue(Tasks.class);
-                Log.e(LOG_TAG, "task " + tasks.status);
-                if (tasks.status == Tasks.TASK_INCOMPLETE) {
+                if (tasks != null && tasks.status == Tasks.TASK_INCOMPLETE) {
                     sendReminderNotification(tasks, context);
                 } else {
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(context, tasks.getPendingIntentId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -80,7 +80,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
         Uri notificationSound = RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, NOTIFICATION_TASK_CHANNEL_ID);
-        builder.setContentTitle(tasks.taskTitle.concat(" reminder"))
+        builder.setContentTitle(tasks.getTaskTitle() + " reminder")
                 .setContentText("You are yet to complete this task")
                 .setAutoCancel(true)
                 .setColor(ContextCompat.getColor(context, R.color.colorPrimary))

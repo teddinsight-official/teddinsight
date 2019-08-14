@@ -55,6 +55,7 @@ import ng.com.teddinsight.teddinsight_app.fragments.CustomerSupportFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.DesignsFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.LogsFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.ScheduledPostFragment;
+import ng.com.teddinsight.teddinsight_app.fragments.TaskFragment;
 import ng.com.teddinsight.teddinsight_app.models.ClientCalendar;
 import ng.com.teddinsight.teddinsight_app.models.ContentNotes;
 import ng.com.teddinsight.teddinsight_app.models.SocialAccounts;
@@ -76,6 +77,7 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
     String email;
     String profileImage;
     private PrimaryDrawerItem conversationDrawerItem;
+    private PrimaryDrawerItem taskDrawerItem;
     private FragmentManager fragmentManager;
     @State
     long currentState;
@@ -104,6 +106,8 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
         PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withIcon(GoogleMaterial.Icon.gmd_home).withName("Home").withTypeface(typeface);
         conversationDrawerItem = new PrimaryDrawerItem().withName("Conversations").withIdentifier(3).withTypeface(typeface).withIcon(GoogleMaterial.Icon.gmd_chat)
                 .withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700));
+        taskDrawerItem = new PrimaryDrawerItem().withName("Tasks").withIdentifier(11).withTypeface(typeface).withIcon(GoogleMaterial.Icon.gmd_work)
+                .withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.red_700));
 
 
         AccountHeader headerResult = new AccountHeaderBuilder()
@@ -123,6 +127,7 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
                 .withToolbar(toolbar)
                 .addDrawerItems(
                         item1,
+                        taskDrawerItem,
                         new PrimaryDrawerItem().withName("Scheduled Posts").withIcon(GoogleMaterial.Icon.gmd_schedule).withIdentifier(2).withTypeface(typeface),
                         new PrimaryDrawerItem().withName("Designs").withIcon(GoogleMaterial.Icon.gmd_image_aspect_ratio).withIdentifier(9).withTypeface(typeface),
                         new PrimaryDrawerItem().withName("Content Notes").withIcon(GoogleMaterial.Icon.gmd_event_note).withIdentifier(10).withTypeface(typeface),
@@ -159,6 +164,8 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
                             replaceFragmentContainerContent(DesignsFragment.NewInstance(User.USER_ADMIN), false);
                         else if (identifier == 10)
                             replaceFragmentContainerContent(ContentCuratorHomeFragment.NewInstance(User.USER_ADMIN), false);
+                        else if (identifier == 11)
+                            replaceFragmentContainerContent(TaskFragment.NewInstance(User.USER_ADMIN), false);
                     }
                     return false;
                 })
@@ -176,18 +183,24 @@ public class AdminActivity extends BaseActivity implements ClientListFragment.Cl
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Log.e(LOG_TAG, "new notification");
                 Notifications notifications = dataSnapshot.getValue(Notifications.class);
-                if (notifications != null && currentState != 3) {
+                if (notifications != null) {
                     //fdfs
+                    if (notifications.newTaskReceived && currentState != 11) {
+                        taskDrawerItem.withBadge("new").withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700));
+                        Toast.makeText(AdminActivity.this, "You have new tasks", Toast.LENGTH_LONG).show();
+                    } else {
+                        taskDrawerItem.withBadge("").withBadgeStyle(new BadgeStyle().withColorRes(R.color.white));
+                    }
                     int count = notifications.count;
-                    if (count > 0) {
+                    if (count > 0 && currentState != 3) {
                         String countText = count > 99 ? "9+" : String.valueOf(count);
                         conversationDrawerItem.withBadge(countText).withBadgeStyle(new BadgeStyle().withTextColor(Color.WHITE).withColorRes(R.color.md_red_700));
                         Toast.makeText(AdminActivity.this, "You have unread messages", Toast.LENGTH_LONG).show();
-                        ExtraUtils.playSound(getApplication());
                     } else {
-                        conversationDrawerItem.withBadge("").withBadgeStyle(new BadgeStyle().withColorRes(R.color.md_amber_50));
+                        conversationDrawerItem.withBadge("").withBadgeStyle(new BadgeStyle().withColorRes(R.color.white));
                     }
                     drawer.updateItem(conversationDrawerItem);
+                    drawer.updateItem(taskDrawerItem);
                 }
             }
 

@@ -104,7 +104,7 @@ public class ClientCalendarViewModel extends ViewModel {
             }
         };
         reference = FirebaseDatabase.getInstance().getReference().child(ClientCalendar.getBaseTableName()).child(clientId);
-        query = reference;
+        query = reference.orderByChild("invertedDate");
         _message.setValue(null);
         _clientCalendarList.setValue(new ArrayList<>());
         query.addValueEventListener(myValueEventListener);

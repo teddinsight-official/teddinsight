@@ -10,6 +10,7 @@ public class ClientCalendar {
     private String name;
     private int taskCount;
     private long dateCreated = System.currentTimeMillis();
+    private long invertedDate = -1 * dateCreated;
     private boolean needsPublishing;
     private boolean beginPublishing;
     private String clientId;
@@ -17,6 +18,7 @@ public class ClientCalendar {
     public static String getBaseTableName() {
         return "clientCalendarBaseTable";
     }
+
     public static String getTableName() {
         return "clientCalendarTable";
     }

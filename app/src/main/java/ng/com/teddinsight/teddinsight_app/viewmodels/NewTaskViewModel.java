@@ -90,10 +90,10 @@ public class NewTaskViewModel extends ViewModel {
                 List<User> users = new ArrayList<>();
                 if (dataSnapshot.getChildrenCount() > 0) {
                     List<String> ignoreUsers = new ArrayList<>();
-                    ignoreUsers.add(User.USER_ADMIN);
+                    //ignoreUsers.add(User.USER_ADMIN);
                     ignoreUsers.add(User.USER_CLIENT);
                     ignoreUsers.add(User.USER_PARTNER);
-                    ignoreUsers.add(User.USER_HR);
+                    //ignoreUsers.add(User.USER_HR);
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         User u = snapshot.getValue(User.class);
                         if (!ignoreUsers.contains(u.getRole()))

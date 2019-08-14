@@ -17,10 +17,10 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 
 
-
 import ng.com.teddinsight.teddinsight_app.R;
 import ng.com.teddinsight.teddinsight_app.fragments.HrHomeFragment;
 import ng.com.teddinsight.teddinsight_app.fragments.StaffDetailFragment;
+import ng.com.teddinsight.teddinsight_app.fragments.TaskFragment;
 import ng.com.teddinsight.teddinsight_app.listeners.Listeners;
 import ng.com.teddinsight.teddinsightchat.fragments.ChatListFragment;
 
@@ -83,4 +83,7 @@ public class HrHomeActivity extends BaseActivity implements Listeners.HrMainCont
         onHrMainContentReplacementRequest(ChatListFragment.NewInstance(), true);
     }
 
+    public void viewTasks(View view) {
+        replaceFragmentContainerContent(TaskFragment.NewInstance(User.USER_HR), true);
+    }
 }
